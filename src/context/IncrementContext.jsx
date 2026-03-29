@@ -1,4 +1,5 @@
 // First we create a new Context
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useEffect, useState } from "react";
 
 export const incrementContextCreation = createContext();
@@ -6,21 +7,23 @@ export const incrementContextCreation = createContext();
 function IncrementContext({children}) {
 
     let defVal = -1;
+    let [counter, setCounter] = useState(defVal);
+
     let fetchDefaultVal = async () => {
         try {let res = await fetch("http://localhost:3000/settings", {method: "GET"});
         let {defaultVal} = await res.json();
-        setCounter(defaultVal);
+        setCounter(Number(defaultVal));
         console.log("ntg", defaultVal);
         } catch (e) {
             console.log("Error:", e);
         }
     }
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchDefaultVal();
         console.log("inside useEffect()");
     }, []);
 
-    let [counter, setCounter] = useState(defVal);
     let increment = () => {
         setCounter(counter + 1);
     }
@@ -33,10 +36,11 @@ function IncrementContext({children}) {
     }
     
     let setDefault = async (val) => {
+        let numVal = Number(val);
         let res = await fetch("http://localhost:3000/settings", {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({defaultVal : val})
+            body: JSON.stringify({defaultVal : numVal})
         });
         console.log(res);
         console.log("inside setDefault");
