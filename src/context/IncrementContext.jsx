@@ -50,7 +50,7 @@ function IncrementContext({children}) {
     // setTimeout(() => {
     //     setDefault(100);
     // }, 3000);
-    // setDefault(100);
+
 
     return (
         <incrementContextCreation.Provider value={{counter, increment, decrement, reset, setDefault}}>
