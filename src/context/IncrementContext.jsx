@@ -49,7 +49,6 @@ function IncrementContext({children}) {
 
     // setTimeout(() => {
     //     setDefault(100);
-    // }, 3000);
 
 
     return (
