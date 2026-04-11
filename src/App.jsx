@@ -60,10 +60,18 @@ function App() {
   const [processingText, setProcessingText] = useState('')
   const [submittedText, setSubmittedText] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [revealId, setRevealId] = useState(0)
+  const [hasAppearedOnce, setHasAppearedOnce] = useState(false)
+  const [isOutputVisible, setIsOutputVisible] = useState(false)
+  const [textChangeTick, setTextChangeTick] = useState(0)
   const [cursorEndPx, setCursorEndPx] = useState(0)
+  const inputGlassRef = useRef(null)
   const inputTrackRef = useRef(null)
   const measureTextRef = useRef(null)
+  const outputTileRef = useRef(null)
+  const closeButtonRef = useRef(null)
+  const graphCanvasRef = useRef(null)
+  const graphPointerRef = useRef({ x: 0, y: 0, clientY: 0, active: false })
+  const graphScrollRef = useRef(0)
   const submitTimerRef = useRef(null)
   const processingChars = useMemo(() => processingText.split(''), [processingText])
 
@@ -79,7 +87,10 @@ function App() {
       setSubmittedText(trimmedValue)
       setDraftText('')
       setProcessingText('')
-      setRevealId((prev) => prev + 1)
+      setTextChangeTick((prev) => prev + 1)
+      if (!isOutputVisible) {
+        setIsOutputVisible(true)
+      }
       setIsSubmitting(false)
     }, submitDuration)
   }
@@ -105,9 +116,256 @@ function App() {
     setCursorEndPx(targetLeft)
   }, [isSubmitting, processingText])
 
+  useEffect(() => {
+    const canvas = graphCanvasRef.current
+    if (!canvas) return
+
+    const context = canvas.getContext('2d')
+    if (!context) return
+
+    let frameId = 0
+    let width = 0
+    let height = 0
+    let pageHeight = 0
+    const nodes = []
+
+    const buildGraph = () => {
+      nodes.length = 0
+      const spacing = 120
+      const jitter = 22
+
+      for (let y = spacing * 0.5; y < pageHeight + spacing; y += spacing) {
+        for (let x = spacing * 0.5; x < width + spacing; x += spacing) {
+          nodes.push({
+            x: x + (Math.random() - 0.5) * jitter,
+            y: y + (Math.random() - 0.5) * jitter,
+          })
+        }
+      }
+    }
+
+    const updatePageHeight = () => {
+      const doc = document.documentElement
+      const nextPageHeight = Math.max(doc.scrollHeight, doc.clientHeight)
+      if (nextPageHeight !== pageHeight) {
+        pageHeight = nextPageHeight
+        buildGraph()
+      }
+    }
+
+    const resizeCanvas = () => {
+      width = window.innerWidth
+      height = window.innerHeight
+      const dpr = window.devicePixelRatio || 1
+
+      updatePageHeight()
+
+      canvas.width = Math.floor(width * dpr)
+      canvas.height = Math.floor(height * dpr)
+      canvas.style.width = `${width}px`
+      canvas.style.height = `${height}px`
+      context.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
+
+    const drawGraph = () => {
+      const scrollY = graphScrollRef.current * 1.08
+      const viewportHeight = window.innerHeight
+      context.clearRect(0, 0, width, height)
+
+      const pointer = graphPointerRef.current
+      const influenceRadius = 190
+      const linkRadius = 168
+
+      const displaced = nodes.map((node) => {
+        if (!pointer.active) return { x: node.x, y: node.y, influence: 0 }
+
+        const dx = pointer.x - node.x
+        const dy = pointer.y - node.y
+        const distance = Math.hypot(dx, dy)
+
+        if (distance > influenceRadius || distance === 0) {
+          return { x: node.x, y: node.y, influence: 0 }
+        }
+
+        const t = 1 - distance / influenceRadius
+        const eased = t * t * (3 - 2 * t)
+        const pull = eased * 14
+
+        return {
+          x: node.x + (dx / distance) * pull,
+          y: node.y + (dy / distance) * pull,
+          influence: eased,
+        }
+      })
+
+      for (let i = 0; i < displaced.length; i += 1) {
+        const a = displaced[i]
+
+        for (let j = i + 1; j < displaced.length; j += 1) {
+          const b = displaced[j]
+          const dx = b.x - a.x
+          const dy = b.y - a.y
+          const distance = Math.hypot(dx, dy)
+
+          if (distance > linkRadius) continue
+
+          const linkStrength = 1 - distance / linkRadius
+          const glowBoost = (a.influence + b.influence) * 0.14
+          const alpha = 0.04 + linkStrength * 0.12 + glowBoost
+
+          context.strokeStyle = `rgba(173, 154, 255, ${alpha.toFixed(3)})`
+          context.lineWidth = 1
+          context.beginPath()
+          context.moveTo(a.x, a.y - scrollY)
+          context.lineTo(b.x, b.y - scrollY)
+          context.stroke()
+        }
+      }
+
+      for (let i = 0; i < displaced.length; i += 1) {
+        const node = displaced[i]
+        const nodeAlpha = 0.3 + node.influence * 0.55
+        const screenY = node.y - scrollY
+
+        if (screenY < -24 || screenY > viewportHeight + 24) continue
+
+        context.fillStyle = `rgba(198, 183, 255, ${nodeAlpha.toFixed(3)})`
+        context.beginPath()
+        context.arc(node.x, screenY, 1.9 + node.influence * 1.2, 0, Math.PI * 2)
+        context.fill()
+      }
+
+      frameId = window.requestAnimationFrame(drawGraph)
+    }
+
+    const handlePointerMove = (event) => {
+      graphPointerRef.current = {
+        x: event.clientX,
+        y: event.clientY + window.scrollY,
+        clientY: event.clientY,
+        active: true,
+      }
+    }
+
+    const handlePointerLeave = () => {
+      graphPointerRef.current.active = false
+    }
+
+    const handleScroll = () => {
+      graphScrollRef.current = window.scrollY
+      updatePageHeight()
+
+      if (graphPointerRef.current.active) {
+        graphPointerRef.current.y = graphPointerRef.current.clientY + window.scrollY
+      }
+    }
+
+    graphScrollRef.current = window.scrollY
+    resizeCanvas()
+    drawGraph()
+
+    window.addEventListener('resize', resizeCanvas)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('pointermove', handlePointerMove, { passive: true })
+    window.addEventListener('pointerleave', handlePointerLeave)
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas)
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerleave', handlePointerLeave)
+      if (frameId) {
+        window.cancelAnimationFrame(frameId)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    let rafId = 0
+
+    const updateTileGlow = (tile, event) => {
+      if (!tile) return
+
+      const rect = tile.getBoundingClientRect()
+      const localX = event.clientX - rect.left
+      const localY = event.clientY - rect.top
+
+      const centerX = rect.width / 2
+      const centerY = rect.height / 2
+      const distanceToCenter = Math.hypot(localX - centerX, localY - centerY)
+      const cutoffDistance = Math.max(rect.width, rect.height) * 1.65
+      const proximity = Math.max(0, 1 - distanceToCenter / cutoffDistance)
+      const easedProximity = proximity * proximity * (3 - 2 * proximity)
+      const alpha = easedProximity < 0.03 ? 0 : easedProximity * 0.48
+
+      tile.style.setProperty('--mx', `${localX}px`)
+      tile.style.setProperty('--my', `${localY}px`)
+      tile.style.setProperty('--ga', alpha.toFixed(3))
+    }
+
+    const applyProximityGlow = (event) => {
+      if (rafId) {
+        window.cancelAnimationFrame(rafId)
+      }
+
+      rafId = window.requestAnimationFrame(() => {
+        updateTileGlow(outputTileRef.current, event)
+        updateTileGlow(inputGlassRef.current, event)
+
+        if (closeButtonRef.current) {
+          const rect = closeButtonRef.current.getBoundingClientRect()
+          const centerX = rect.left + rect.width / 2
+          const centerY = rect.top + rect.height / 2
+          const distance = Math.hypot(event.clientX - centerX, event.clientY - centerY)
+          const cutoffDistance = Math.max(rect.width, rect.height) * 2.35
+          const proximity = Math.max(0, 1 - distance / cutoffDistance)
+          const easedProximity = proximity * proximity * (3 - 2 * proximity)
+          const alpha = easedProximity < 0.03 ? 0 : easedProximity * 0.46
+          closeButtonRef.current.style.setProperty('--cg', alpha.toFixed(3))
+        }
+      })
+    }
+
+    const clearGlow = () => {
+      if (outputTileRef.current) {
+        outputTileRef.current.style.setProperty('--ga', '0')
+      }
+      if (inputGlassRef.current) {
+        inputGlassRef.current.style.setProperty('--ga', '0')
+      }
+      if (closeButtonRef.current) {
+        closeButtonRef.current.style.setProperty('--cg', '0')
+      }
+    }
+
+    window.addEventListener('pointermove', applyProximityGlow, { passive: true })
+    window.addEventListener('pointerleave', clearGlow)
+
+    return () => {
+      window.removeEventListener('pointermove', applyProximityGlow)
+      window.removeEventListener('pointerleave', clearGlow)
+      if (rafId) {
+        window.cancelAnimationFrame(rafId)
+      }
+    }
+  }, [])
+
   return (
     <>
-      <section id="center">
+      <canvas
+        ref={graphCanvasRef}
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          width: '100vw',
+          height: '100vh',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
+
+      <section id="center" style={{ position: 'relative', zIndex: 1 }}>
         <div className="app-container">
           <button
             type="button"
@@ -239,30 +497,58 @@ function App() {
         <div style={{ width: '100%', maxWidth: 380, marginTop: 14 }}>
           <div style={{ display: 'flex', gap: 8 }}>
             <div
-              ref={inputTrackRef}
-              style={{ position: 'relative', flex: 1, overflow: 'hidden', borderRadius: 8 }}
+              ref={inputGlassRef}
+              style={{
+                position: 'relative',
+                flex: 1,
+                overflow: 'hidden',
+                borderRadius: 10,
+                padding: 2,
+                background:
+                  'radial-gradient(160px circle at var(--mx, 50%) var(--my, 50%), rgb(124 92 255 / var(--ga, 0)) 0%, rgb(124 92 255 / 0) 74%), linear-gradient(140deg, color-mix(in srgb, var(--bg) 74%, transparent) 0%, color-mix(in srgb, var(--bg) 62%, transparent) 100%)',
+                backdropFilter: 'blur(20px) saturate(112%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(112%)',
+                border: '0.75px solid color-mix(in srgb, var(--border) 84%, white 16%)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -10px 20px rgba(255, 255, 255, 0.03), 0 10px 20px rgba(0, 0, 0, 0.2)',
+              }}
             >
-              <input
-                type="text"
-                value={draftText}
-                onChange={(event) => setDraftText(event.target.value.slice(0, MAX_INPUT_LENGTH))}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') handleTextSubmit()
-                }}
-                maxLength={MAX_INPUT_LENGTH}
-                placeholder="Type something..."
-                disabled={isSubmitting}
+              <div
+                ref={inputTrackRef}
                 style={{
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  padding: '10px 34px 10px 12px',
+                  position: 'relative',
+                  overflow: 'hidden',
                   borderRadius: 8,
-                  border: '1px solid var(--border)',
-                  background: 'var(--bg)',
-                  color: 'var(--text-h)',
-                  fontSize: 14,
+                  background:
+                    'linear-gradient(180deg, color-mix(in srgb, var(--bg) 95%, transparent) 0%, color-mix(in srgb, var(--bg) 92%, transparent) 100%)',
+                  border: '0.75px solid color-mix(in srgb, var(--border) 70%, transparent)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 0 14px rgba(124, 92, 255, 0.12)',
                 }}
-              />
+              >
+                <input
+                  type="text"
+                  value={draftText}
+                  onChange={(event) => setDraftText(event.target.value.slice(0, MAX_INPUT_LENGTH))}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') handleTextSubmit()
+                  }}
+                  maxLength={MAX_INPUT_LENGTH}
+                  placeholder="Type something..."
+                  disabled={isSubmitting}
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: '10px 34px 10px 12px',
+                    borderRadius: 8,
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    color: 'var(--text-h)',
+                    fontSize: 14,
+                  }}
+                />
+              </div>
               {isSubmitting && (
                 <>
                   <span
@@ -364,25 +650,103 @@ function App() {
             {draftText.length}/{MAX_INPUT_LENGTH}
           </p>
           <AnimatePresence mode="wait">
-            {submittedText && (
+            {submittedText && isOutputVisible && (
               <motion.div
-                key={`${submittedText}-${revealId}`}
-                initial={{ opacity: 0, clipPath: 'circle(0% at 50% 50%)', scale: 0.94, y: 8 }}
-                animate={{ opacity: 1, clipPath: 'circle(140% at 50% 50%)', scale: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+                ref={outputTileRef}
+                initial={hasAppearedOnce ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 10, scale: 0.985 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.985 }}
+                whileHover={{ y: -3, transition: { type: 'spring', stiffness: 420, damping: 28 } }}
+                whileTap={{ y: 1, transition: { type: 'spring', stiffness: 520, damping: 32 } }}
+                onAnimationComplete={() => {
+                  if (!hasAppearedOnce) {
+                    setHasAppearedOnce(true)
+                  }
+                }}
                 style={{
+                  position: 'relative',
+                  overflow: 'visible',
                   marginTop: 10,
-                  fontSize: 14,
-                  padding: '8px 10px',
+                  padding: 2,
                   borderRadius: 10,
-                  color: 'var(--text-h)',
-                  background: 'radial-gradient(circle at 35% 40%, #2b2e45 0%, #202334 45%, #181a27 100%)',
-                  border: '1px solid #3b3f57',
-                  boxShadow: '0 8px 22px rgba(0, 0, 0, 0.35)',
+                  background:
+                    'radial-gradient(170px circle at var(--mx, 50%) var(--my, 50%), rgb(124 92 255 / var(--ga, 0)) 0%, rgb(124 92 255 / 0) 74%), linear-gradient(140deg, color-mix(in srgb, var(--bg) 74%, transparent) 0%, color-mix(in srgb, var(--bg) 62%, transparent) 100%)',
+                  backdropFilter: 'blur(20px) saturate(112%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(112%)',
+                  border: '0.75px solid color-mix(in srgb, var(--border) 84%, white 16%)',
+                  boxShadow:
+                    'inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -10px 20px rgba(255, 255, 255, 0.03), 0 10px 20px rgba(0, 0, 0, 0.2)',
                 }}
               >
-                You wrote: {submittedText}
+                <motion.button
+                  ref={closeButtonRef}
+                  type="button"
+                  aria-label="Close output tile"
+                  onClick={() => setIsOutputVisible(false)}
+                  whileHover={{
+                    scale: 1.04,
+                    y: -1,
+                    transition: { type: 'spring', stiffness: 420, damping: 24 },
+                  }}
+                  whileTap={{
+                    scale: 0.95,
+                    y: 1,
+                    transition: { type: 'spring', stiffness: 520, damping: 28 },
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: -8,
+                    right: -8,
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    border: '0.75px solid rgba(255, 140, 165, 0.42)',
+                    background:
+                      'linear-gradient(155deg, rgba(36,24,34,0.72) 0%, rgba(46,26,40,0.62) 34%, rgba(96,34,58,0.52) 100%)',
+                    backdropFilter: 'blur(44px) saturate(172%) brightness(92%)',
+                    WebkitBackdropFilter: 'blur(44px) saturate(172%) brightness(92%)',
+                    color: 'rgba(255, 130, 155, 0.96)',
+                    fontSize: 11,
+                    lineHeight: '18px',
+                    boxShadow:
+                      'inset 0 1px 0 rgba(255, 176, 200, 0.24), inset 0 -4px 12px rgba(80, 24, 48, 0.42), 0 0 16px rgba(255, 108, 148, var(--cg, 0)), 0 6px 15px rgba(24, 8, 18, 0.46), 0 0 0 1px rgba(255, 130, 165, 0.13)',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    padding: 0,
+                    zIndex: 10,
+                    '--cg': 0,
+                  }}
+                >
+                  x
+                </motion.button>
+                <div
+                  style={{
+                    position: 'relative',
+                    zIndex: 4,
+                    borderRadius: 8,
+                    padding: '8px 28px 8px 10px',
+                    fontSize: 14,
+                    color: 'var(--text-h)',
+                    background:
+                      'linear-gradient(180deg, color-mix(in srgb, var(--bg) 95%, transparent) 0%, color-mix(in srgb, var(--bg) 92%, transparent) 100%)',
+                    border: '0.75px solid color-mix(in srgb, var(--border) 70%, transparent)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 0 14px rgba(124, 92, 255, 0.12)',
+                  }}
+                >
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={textChangeTick}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.2 }}
+                      style={{ display: 'inline-block' }}
+                    >
+                      You wrote: {submittedText}
+                    </motion.span>
+                  </AnimatePresence>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -405,7 +769,7 @@ function App() {
 
       <div className="ticks"></div>
 
-      <section id="next-steps">
+      <section id="next-steps" style={{ position: 'relative', zIndex: 1 }}>
         <div id="docs">
           <svg className="icon" role="presentation" aria-hidden="true">
             <use href="/icons.svg#documentation-icon"></use>
@@ -472,7 +836,7 @@ function App() {
       </section>
 
       <div className="ticks"></div>
-      <section id="spacer"></section>
+      <section id="spacer" style={{ position: 'relative', zIndex: 1 }}></section>
     </>
   )
 }
