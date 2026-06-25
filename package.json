@@ -1,0 +1,26 @@
+{
+  "name": "rnd-publications-platform",
+  "private": true,
+  "workspaces": [
+    "web",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,server -c cyan,magenta \"npm run dev --workspace web\" \"npm run dev --workspace server\"",
+    "build": "npm run build --workspace web && npm run build --workspace server",
+    "start": "npm run start --workspace server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "google-auth-library": "^10.7.0",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "overrides": {
+    "shell-quote": "^1.8.4"
+  }
+
+}
