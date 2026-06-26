@@ -48,7 +48,7 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
 
   return (
     <div className="flex min-h-screen flex-col bg-surface-50">
-      {/* Navigation Bar */}
+      {/* Navigation Bar*/}
       <nav className="border-b border-surface-200 bg-white shadow-sm">
         <div className="mx-auto max-w-full px-6 py-4">
           <div className="flex items-center justify-between">
@@ -267,7 +267,8 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                 <div className="flex flex-col items-end gap-3">
                   <div className="flex items-center gap-3">
                     {(selectedEntry?.owner === userEmail ||
-                      userEmail in selectedEntry?.contributors) && (
+                      (selectedEntry?.contributors?.includes(userEmail) ??
+                        false)) && (
                       <button
                         onClick={() =>
                           navigate(`/dashboard/entries/${selectedEntryId}/edit`)
@@ -541,7 +542,7 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                       {(selectedEntry?.timeline ?? []).length === 0 && (
                         <p className="text-sm text-muted">No activity yet.</p>
                       )}
-                      {(selectedEntry?.timeline ?? []).map((item, idx) => (
+                      {(selectedEntry?.timeline ?? []).map((item) => (
                         <div
                           key={item.id}
                           className="flex gap-3 border-l-2 border-brand-200 pb-4 pl-4 last:border-l-transparent"
@@ -613,8 +614,9 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                         .slice()
                         .reverse()
                         .map((version) => (
-                          <div
+                          <button
                             key={version.id}
+                            type="button" // 👈 Explicitly define button type so it doesn't accidentally submit forms
                             onClick={() =>
                               setSelectedVersion(
                                 selectedVersion === version.id
@@ -622,7 +624,8 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                                   : version.id,
                               )
                             }
-                            className="cursor-pointer rounded-lg border border-surface-200 p-3 transition hover:bg-surface-50"
+                            // Added "w-full text-left" to make sure it stretches and aligns like your original div did
+                            className="w-full text-left cursor-pointer rounded-lg border border-surface-200 p-3 transition hover:bg-surface-50"
                           >
                             <div className="flex items-start gap-3">
                               <code className="text-xs font-mono text-brand-700">
@@ -645,7 +648,7 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                                 <p>📄 File: {version.fileName}</p>
                               </div>
                             )}
-                          </div>
+                          </button>
                         ))}
                     </div>
                   </div>
