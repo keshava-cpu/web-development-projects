@@ -92,7 +92,7 @@ app.get("/api/auth/college-oauth/start", (request, response) => {
   const url = googleClient.generateAuthUrl({
     access_type: "offline",
     scope: ["openid", "email", "profile"],
-    prompt: "consent",
+    prompt: "select_account",
   });
   response.json({ url });
 });
