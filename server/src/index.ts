@@ -197,7 +197,7 @@ app.get("/api/auth/google/callback/complete.js", (request, response) => {
         } catch (e) {
           // Ignore close failures.
         }
-      }, 1500);
+      }, 3000);
     })();
   `);
 });

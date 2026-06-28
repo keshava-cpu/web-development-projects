@@ -469,7 +469,7 @@ function App() {
         // Poll /api/auth/me until authenticated or timeout. Only navigate after success.
         const start = Date.now();
         const timeout = 60000; // 60s
-        const interval = 1500; // slightly less frequent to reduce noisy 401s
+        const interval = 600; // slightly less frequent to reduce noisy 401s
 
         const pollId = window.setInterval(async () => {
           pollRef.current = pollId;
