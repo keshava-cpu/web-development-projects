@@ -2,7 +2,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import globals from "globals";
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
-import react from "eslint-plugin-react";
+import eslintReact from "@eslint-react/eslint-plugin"; // 1. Swapped plugin import
 import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
 import prettier from "eslint-config-prettier";
 
@@ -16,9 +16,8 @@ export default defineConfig([
   // TypeScript recommended rules
   ...tseslint.configs.recommended,
 
-  // 1. Native Flat Configs for React
-  react.configs.flat.recommended,
-  react.configs.flat["jsx-runtime"],
+  // 2. Add the native modern React rules
+  eslintReact.configs.recommended,
 
   // Application Rules & Overrides
   {
@@ -27,10 +26,9 @@ export default defineConfig([
       "jsx-a11y": jsxA11yPlugin,
     },
     rules: {
-      // Add accessibility rules
       ...jsxA11yPlugin.configs.recommended.rules,
 
-      // Put any custom rule overrides here (e.g., "react/prop-types": "off")
+      // Custom overrides go here if needed
     },
     languageOptions: {
       globals: {
@@ -39,11 +37,7 @@ export default defineConfig([
       ecmaVersion: "latest",
       sourceType: "module",
     },
-    settings: {
-      react: {
-        version: "detect",
-      },
-    },
+    // 3. Removed the settings.react block entirely (no more version crashes!)
   },
 
   // Prettier Formatting (Always last)
