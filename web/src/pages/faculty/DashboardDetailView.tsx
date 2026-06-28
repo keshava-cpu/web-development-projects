@@ -47,7 +47,7 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
   const location = useLocation();
 
   return (
-    <div className="flex min-h-screen flex-col bg-surface-50">
+    <div className="flex h-screen flex-col bg-surface-50">
       {/* Navigation Bar*/}
       <nav className="border-b border-surface-200 bg-white shadow-sm">
         <div className="mx-auto max-w-full px-6 py-4">
@@ -83,10 +83,10 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
       </nav>
 
       {/* Main Content with Sidebar */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex border-2 flex-1 overflow-hidden">
         {/* Sidebar */}
         <aside
-          className={`bg-white shadow-sm transition-all duration-300 ${
+          className={`bg-white shadow-sm top-0 transition-all duration-300 ${
             sidebarCollapsed ? "w-16" : "w-80"
           } flex flex-col`}
         >
@@ -545,10 +545,10 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                       {(selectedEntry?.timeline ?? []).map((item) => (
                         <div
                           key={item.id}
-                          className="flex gap-3 border-l-2 border-brand-200 pb-4 pl-4 last:border-l-transparent"
+                          className="flex relative gap-3 border-l-2 border-brand-200 pb-4 pl-4 last:border-l-transparent"
                         >
                           <div>
-                            <div className="absolute -ml-5 mt-0.5 h-3 w-3 rounded-full bg-brand-600" />
+                            <div className="absolute -ml-6 -mt-1 h-3 w-3 rounded-full bg-brand-600" />
                             <div className="flex flex-wrap items-center gap-2 text-sm">
                               <span className="font-semibold text-brand-950">
                                 {item.kind === "Edited" && "📝"}
