@@ -2,7 +2,7 @@ import cors from "cors";
 import express, { Request, Response, NextFunction } from "express";
 import helmet from "helmet";
 import { OAuth2Client } from "google-auth-library";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { apiEntries, ApiEntryStatus } from "./data.js";
 import "dotenv/config";
@@ -13,12 +13,14 @@ const port = Number(process.env.PORT ?? 4000);
 const googleClient = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI
+  process.env.GOOGLE_REDIRECT_URI,
 );
 
 const jwtSecret = process.env.JWT_SECRET || "default-secret";
 const allowedDomain = process.env.ALLOWED_EMAIL_DOMAIN || "example.com";
-const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim());
+const adminEmails = (process.env.ADMIN_EMAILS || "")
+  .split(",")
+  .map((e) => e.trim());
 
 interface AuthPayload {
   email: string;
@@ -53,12 +55,14 @@ function verifyToken(request: Request, response: Response, next: NextFunction) {
 app.use(
   helmet({
     crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
-  })
+  }),
 );
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use(verifyToken);
@@ -67,7 +71,7 @@ app.get("/health", (_request, response) => {
   response.json({
     ok: true,
     service: "rnd-publications-api",
-    time: new Date().toISOString()
+    time: new Date().toISOString(),
   });
 });
 
@@ -88,13 +92,12 @@ app.get("/api/auth/college-oauth/start", (request, response) => {
   const url = googleClient.generateAuthUrl({
     access_type: "offline",
     scope: ["openid", "email", "profile"],
-    prompt: "consent"
+    prompt: "consent",
   });
   response.json({ url });
 });
 
 app.get("/api/auth/google/callback", async (request, response) => {
-  console.log("calllbaaaaackkkkkkkk");
   const { code } = request.query;
 
   if (!code) {
@@ -108,7 +111,7 @@ app.get("/api/auth/google/callback", async (request, response) => {
 
     const ticket = await googleClient.verifyIdToken({
       idToken: tokens.id_token!,
-      audience: process.env.GOOGLE_CLIENT_ID
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
 
     const payload = ticket.getPayload();
@@ -123,7 +126,7 @@ app.get("/api/auth/google/callback", async (request, response) => {
     if (emailDomain !== allowedDomain) {
       response.status(403).json({
         error: "invalid_domain",
-        message: `Only ${allowedDomain} email addresses are allowed`
+        message: `Only ${allowedDomain} email addresses are allowed`,
       });
       return;
     }
@@ -134,7 +137,7 @@ app.get("/api/auth/google/callback", async (request, response) => {
       email,
       name: payload.name,
       picture: payload.picture,
-      role
+      role,
     };
 
     const token = jwt.sign(authPayload, jwtSecret, { expiresIn: "7d" });
@@ -143,7 +146,7 @@ app.get("/api/auth/google/callback", async (request, response) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     response.type("html").send(`
@@ -163,13 +166,14 @@ app.get("/api/auth/google/callback", async (request, response) => {
     console.error("OAuth error:", error);
     response.status(500).json({
       error: "oauth_failed",
-      message: error instanceof Error ? error.message : "Unknown error"
+      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 });
 
 app.get("/api/auth/google/callback/complete.js", (request, response) => {
-  const userParam = typeof request.query.user === "string" ? request.query.user : "{}";
+  const userParam =
+    typeof request.query.user === "string" ? request.query.user : "{}";
   const frontendOrigin = process.env.FRONTEND_URL || "http://localhost:5173";
 
   response.type("application/javascript").send(`
@@ -201,7 +205,7 @@ app.get("/api/auth/google/callback/complete.js", (request, response) => {
 app.post("/api/auth/manual/start", (_request, response) => {
   response.json({
     message: "Manual verification scaffolded",
-    next: "Send college email verification link and create password setup here."
+    next: "Send college email verification link and create password setup here.",
   });
 });
 
@@ -216,7 +220,7 @@ app.post("/api/auth/mock-login", (request, response) => {
   const authPayload: AuthPayload = {
     email,
     name: name || email.split("@")[0],
-    role: role === "admin" ? "admin" : "faculty"
+    role: role === "admin" ? "admin" : "faculty",
   };
 
   const token = jwt.sign(authPayload, jwtSecret, { expiresIn: "7d" });
@@ -225,7 +229,7 @@ app.post("/api/auth/mock-login", (request, response) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
   response.json(authPayload);
@@ -241,7 +245,22 @@ app.post("/api/publications", (request, response) => {
     return;
   }
 
-  const { id, title, department, owner, contributors, status, summary, latestFile, updatedAt, metrics, versions, timeline, messages, adminNotes } = request.body;
+  const {
+    id,
+    title,
+    department,
+    owner,
+    contributors,
+    status,
+    summary,
+    latestFile,
+    updatedAt,
+    metrics,
+    versions,
+    timeline,
+    messages,
+    adminNotes,
+  } = request.body;
 
   if (!id || !title || !department || !owner) {
     response.status(400).json({ error: "missing_required_fields" });
@@ -262,7 +281,7 @@ app.post("/api/publications", (request, response) => {
     versions: versions || [],
     timeline: timeline || [],
     messages: messages || [],
-    adminNotes: adminNotes || []
+    adminNotes: adminNotes || [],
   };
 
   apiEntries.unshift(newEntry);
@@ -280,7 +299,9 @@ app.post("/api/publications/:id/status", (request, response) => {
   const target = apiEntries.find((entry) => entry.id === request.params.id);
 
   if (!target || !nextStatus) {
-    response.status(400).json({ error: "publication_not_found_or_invalid_status" });
+    response
+      .status(400)
+      .json({ error: "publication_not_found_or_invalid_status" });
     return;
   }
 
@@ -290,7 +311,7 @@ app.post("/api/publications/:id/status", (request, response) => {
       month: "short",
       day: "numeric",
       hour: "2-digit",
-      minute: "2-digit"
+      minute: "2-digit",
     });
   }
   target.updatedAt = new Date().toISOString();
@@ -320,12 +341,24 @@ app.post("/api/publications/:id/update", (request, response) => {
 
   // Verify that only the owner can edit
   if (target.owner !== request.user.email) {
-    response.status(403).json({ error: "unauthorized", message: "Only the entry owner can edit this publication" });
+    response.status(403).json({
+      error: "unauthorized",
+      message: "Only the entry owner can edit this publication",
+    });
     return;
   }
 
   // Update allowed fields
-  const { title, department, summary, contributors, latestFile, metrics, newVersion, timelineEvent } = request.body;
+  const {
+    title,
+    department,
+    summary,
+    contributors,
+    latestFile,
+    metrics,
+    newVersion,
+    timelineEvent,
+  } = request.body;
 
   if (title !== undefined) target.title = title;
   if (department !== undefined) target.department = department;
@@ -354,4 +387,3 @@ app.post("/api/publications/:id/update", (request, response) => {
 app.listen(port, () => {
   console.log(`R&D publications API running on http://localhost:${port}`);
 });
-
