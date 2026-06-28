@@ -1,0 +1,8 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "https://testing-publications-page.onrender.com/api/:path*"
+        }
+    ]
+}
