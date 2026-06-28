@@ -3,7 +3,7 @@ import {
   Navigate,
   Route,
   Routes,
-  // UNSAFE_RemixErrorBoundary, (this is new)
+  // UNSAFE_RemixErrorBoundary,
   matchPath,
   useLocation,
   useNavigate,
