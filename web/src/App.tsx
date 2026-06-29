@@ -132,7 +132,7 @@ function App() {
   // const [directMessageText, setDirectMessageText] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
-
+  const [initializing, setInitializing] = useState(true);
   const [commitMessage, setCommitMessage] = useState("");
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
 
@@ -144,6 +144,7 @@ function App() {
 
   useEffect(() => {
     if (window.location.pathname !== "/auth-callback") checkAuthStatus();
+    else setInitializing(false);
   }, []);
 
   useEffect(() => {
@@ -384,15 +385,23 @@ function App() {
           setRole((data.role as Role) || initialRole);
           // If on root, navigate to dashboard
           if (window.location.pathname === "/") {
-            navigate("/dashboard");
+            if (role === "admin") {
+              navigate("/admin", { replace: true });
+            } else {
+              navigate("/dashboard", { replace: true });
+            }
           }
         } else {
           setAuthenticated(false);
         }
       })
-      .catch(() => {
+      .catch((err) => {
         // Not authenticated
+        console.warn("Session restoration omitted:", err.message);
         setAuthenticated(false);
+      })
+      .finally(() => {
+        setInitializing(false);
       });
   }
 
@@ -806,6 +815,18 @@ function App() {
   //     </main>
   //   );
   // }
+
+  if (initializing) {
+    return (
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-surface-50">
+        {/* Your spinner element/animation here */}
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent"></div>
+        <p className="mt-4 text-sm font-medium text-brand-950">
+          Loading application session...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-surface-50">
