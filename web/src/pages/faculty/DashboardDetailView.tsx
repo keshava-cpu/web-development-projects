@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { PublicationEntry, EntryStatus } from "@/types";
 
 interface DashboardDetailViewProps {
@@ -44,12 +44,11 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
   isAdmin,
 }) => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   return (
-    <div className="flex h-screen flex-col bg-surface-50">
+    <div className="w-full flex-1 flex overflow-hidden">
       {/* Navigation Bar*/}
-      <nav className="border-b border-surface-200 bg-white shadow-sm">
+      {/* <nav className="border-b border-surface-200 bg-white shadow-sm">
         <div className="mx-auto max-w-full px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
@@ -80,10 +79,10 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
             </button>
           </div>
         </div>
-      </nav>
+      </nav> */}
 
       {/* Main Content with Sidebar */}
-      <div className="flex border-2 flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <aside
           className={`bg-white shadow-sm top-0 transition-all duration-300 ${

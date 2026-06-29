@@ -33,9 +33,9 @@ const CreateEntryView: React.FC<CreateEntryViewProps> = ({
   const navigate = useNavigate();
 
   return (
-    <div className="flex min-h-screen flex-col bg-surface-50">
+    <div className="w-full h-full overflow-y-auto bg-surface-50 p-6 flex justify-center">
       {/* Navigation Bar */}
-      <nav className="border-b border-surface-200 bg-white shadow-sm">
+      {/* <nav className="border-b border-surface-200 bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
@@ -56,7 +56,7 @@ const CreateEntryView: React.FC<CreateEntryViewProps> = ({
             </div>
           </div>
         </div>
-      </nav>
+      </nav> */}
 
       {/* Form Container */}
       <section className="mx-auto w-full max-w-4xl flex-1 px-6 py-6">

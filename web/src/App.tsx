@@ -817,124 +817,6 @@ function App() {
 
   return (
     <main className="min-h-screen bg-surface-50">
-      {/* Header */}
-      <header className="border-b border-surface-200 bg-brand-950 text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-white/60">
-              College R&D
-            </p>
-            <h1 className="text-lg font-semibold">Dashboard</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              className={`rounded-full px-4 py-2 text-sm ${isAdmin ? "bg-white text-brand-900" : "border border-white/20"}`}
-              onClick={() => setIsAdmin((s) => !s)}
-            >
-              Admin privileges: {isAdmin ? "On" : "Off"}
-            </button>
-
-            <div className="relative" ref={notificationsRef}>
-              <button
-                aria-label={`Notifications (${unreadCount} unread)`}
-                aria-haspopup="true"
-                aria-expanded={notificationsOpen}
-                aria-controls="notifications-panel"
-                onClick={toggleNotifications}
-                className="relative rounded-full border border-white/20 bg-transparent p-2 text-sm"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                  />
-                </svg>
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
-
-              {notificationsOpen && (
-                <div
-                  id="notifications-panel"
-                  role="dialog"
-                  aria-label="Notifications"
-                  className="absolute right-0 z-50 mt-2 w-80 rounded-lg bg-white text-black shadow-lg"
-                >
-                  <div className="flex items-center justify-between border-b p-3">
-                    <strong>Notifications</strong>
-                    <div className="flex items-center gap-2">
-                      <button
-                        className="text-sm text-muted"
-                        onClick={markAllNotificationsRead}
-                      >
-                        Mark all read
-                      </button>
-                      <button
-                        className="text-sm"
-                        onClick={() => setNotificationsOpen(false)}
-                      >
-                        Close
-                      </button>
-                    </div>
-                  </div>
-                  <ul className="max-h-64 overflow-auto p-2">
-                    {notifications.length === 0 && (
-                      <li className="p-2 text-sm text-muted">
-                        No notifications
-                      </li>
-                    )}
-                    {notifications.map((n) => (
-                      <li
-                        key={n.id}
-                        className={`flex items-start gap-2 p-2 ${n.unread ? "bg-surface-50" : ""}`}
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <div className="text-sm font-medium">{n.title}</div>
-                            <div className="text-xs text-muted">
-                              {n.createdAt}
-                            </div>
-                          </div>
-                          <div className="mt-1 text-sm text-muted">
-                            {n.detail}
-                          </div>
-                        </div>
-                        {n.unread && (
-                          <button
-                            className="ml-2 text-sm"
-                            onClick={() => markNotificationRead(n.id)}
-                            aria-label="Mark as read"
-                          >
-                            Mark
-                          </button>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-
-            <button
-              className="rounded-full border border-white/20 px-4 py-2 text-sm"
-              onClick={handleLogout}
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      </header>
       {/* Routes */}
       {isAdmin ? (
         <section className="mx-auto max-w-7xl px-6 py-6">
@@ -984,7 +866,20 @@ function App() {
           <Route
             element={
               authenticated ? (
-                <FacultyRoute role={role} />
+                <FacultyRoute
+                  authenticated={authenticated}
+                  role={role}
+                  handleLogout={handleLogout}
+                  unreadCount={unreadCount}
+                  notificationsOpen={notificationsOpen}
+                  setNotificationsOpen={setNotificationsOpen}
+                  toggleNotifications={toggleNotifications}
+                  markAllNotificationsRead={markAllNotificationsRead}
+                  notifications={notifications}
+                  markNotificationRead={markNotificationRead}
+                  notificationsRef={notificationsRef}
+                  selectedEntryId={selectedEntryId}
+                />
               ) : (
                 <Navigate to="/" replace />
               )
@@ -1000,8 +895,6 @@ function App() {
                   selectEntry={selectEntry}
                   statusClasses={statusClasses}
                   statusLabels={statusLabels}
-                  selectedEntry={selectedEntry}
-                  selectedEntryId={selectedEntryId}
                 />
               }
             />
@@ -1069,7 +962,19 @@ function App() {
           <Route
             element={
               authenticated ? (
-                <AdminRoute role={role} />
+                <AdminRoute
+                  authenticated={authenticated}
+                  role={role}
+                  handleLogout={handleLogout}
+                  unreadCount={unreadCount}
+                  notificationsOpen={notificationsOpen}
+                  setNotificationsOpen={setNotificationsOpen}
+                  toggleNotifications={toggleNotifications}
+                  markAllNotificationsRead={markAllNotificationsRead}
+                  notifications={notifications}
+                  markNotificationRead={markNotificationRead}
+                  notificationsRef={notificationsRef}
+                />
               ) : (
                 <Navigate to="/" replace />
               )

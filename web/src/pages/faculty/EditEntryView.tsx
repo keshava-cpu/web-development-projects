@@ -40,19 +40,21 @@ const EditEntryView: React.FC<EditEntryViewProps> = ({
   // const location = useLocation();
   useEffect(() => {
     setSelectedEntryId(selectedEntryId);
-  }, []);
+  }, [selectedEntryId, setSelectedEntryId]);
 
   console.log(selectedEntry);
   return (
-    <div className="flex min-h-screen flex-col bg-surface-50">
-      {/* Top Bar */}
-      <nav className="border-b border-surface-200 bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-6 py-4">
+    <div className="w-full flex-1 flex flex-col bg-surface-50 overflow-y-auto">
+      {/* 🟢 LAYER 1: CLEAN STANDALONE EDIT CONTEXT TOOLBAR BAR */}
+      <nav className="border-b border-surface-200 bg-white shadow-sm sticky top-0 z-10">
+        <div className="mx-auto max-w-full px-6 py-4">
+          {" "}
+          {/* Changed max-w-7xl to max-w-full to fill width */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate("/dashboard")}
-                className="text-brand-600 hover:text-brand-700"
+                className="text-brand-600 hover:text-brand-700 font-medium"
               >
                 ← Back
               </button>
