@@ -158,7 +158,32 @@ app.get("/api/auth/google/callback", async (request, response) => {
     };
 
     const token = jwt.sign(authPayload, jwtSecret, { expiresIn: "7d" });
+    // removed cookies
+    const frontendTarget =
+      process.env.FRONTEND_URL ||
+      "https://testing-publications-page-web.vercel.app";
+    return response.redirect(`${frontendTarget}/auth-callback?token=${token}`);
+  } catch (error) {
+    console.error("OAuth error:", error);
+    const frontendTarget =
+      process.env.FRONTEND_URL ||
+      "https://testing-publications-page-web.vercel.app";
+    return response.redirect(`${frontendTarget}/?error=oauth_failed`);
+  }
+});
 
+app.post("/api/auth/finalize-session", (request, response) => {
+  const { token } = request.body;
+
+  if (!token) {
+    return response.status(400).json({ error: "missing_token" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, jwtSecret) as AuthPayload;
+
+    // Changed sameSite from "none" to "lax" to match mock-login
+    // and keep it fully compatible with Vercel proxy rewrites
     response.cookie("auth_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -166,16 +191,10 @@ app.get("/api/auth/google/callback", async (request, response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    const frontendTarget =
-      process.env.FRONTEND_URL ||
-      "https://testing-publications-page-web.vercel.app";
-    return response.redirect(`${frontendTarget}/auth-callback`);
+    return response.json(decoded);
   } catch (error) {
-    console.error("OAuth error:", error);
-    const frontendTarget =
-      process.env.FRONTEND_URL ||
-      "https://testing-publications-page-web.vercel.app";
-    return response.redirect(`${frontendTarget}/?error=oauth_failed`);
+    console.error("Finalize session error:", error);
+    return response.status(401).json({ error: "invalid_session_token" });
   }
 });
 

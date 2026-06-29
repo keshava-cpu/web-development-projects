@@ -143,7 +143,7 @@ function App() {
   const routeEntryId = detailMatch?.params.entryId;
 
   useEffect(() => {
-    checkAuthStatus();
+    if (window.location.pathname !== "/auth-callback") checkAuthStatus();
   }, []);
 
   useEffect(() => {
@@ -283,16 +283,8 @@ function App() {
         ? `${user.name} signed in successfully.`
         : `${user.email} signed in successfully.`;
       addEntryNotification(title, detail);
-
-      if (user.role === "faculty") {
-        navigate("/dashboard");
-      } else if (user.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/invalid-domain");
-      }
     },
-    [navigate, addEntryNotification],
+    [addEntryNotification],
   );
 
   // function releaseQueuedNotifications(nextQueue?: NotificationItem[]) {
@@ -818,182 +810,170 @@ function App() {
   return (
     <main className="min-h-screen bg-surface-50">
       {/* Routes */}
-      {isAdmin ? (
-        <section className="mx-auto max-w-7xl px-6 py-6">
-          <div className="rounded-2xl border border-surface-200 bg-white p-6 text-center">
-            <h2 className="text-xl font-semibold">Admin Dashboard</h2>
-            <p className="mt-2 text-sm text-muted">
-              Admin view for verification purposes.
-            </p>
-          </div>
-        </section>
-      ) : (
-        <Routes>
-          {/* Login */}
-          <Route
-            path="/"
-            element={
-              authenticated ? (
-                role === "admin" ? (
-                  <Navigate to="/admin" replace />
-                ) : (
-                  <Navigate to="/dashboard" replace />
-                )
+      <Routes>
+        {/* Login */}
+        <Route
+          path="/"
+          element={
+            authenticated ? (
+              role === "admin" ? (
+                <Navigate to="/admin" replace />
               ) : (
-                <LoginPage
-                  handleSignIn={handleSignIn}
-                  handleMockSignIn={handleMockSignIn}
-                  notificationsRef={notificationsRef}
-                  notificationsOpen={notificationsOpen}
-                  setNotificationsOpen={setNotificationsOpen}
-                  unreadCount={unreadCount}
-                  toggleNotifications={toggleNotifications}
-                  markAllNotificationsRead={markAllNotificationsRead}
-                  notifications={notifications}
-                  markNotificationRead={markNotificationRead}
-                />
+                <Navigate to="/dashboard" replace />
               )
+            ) : (
+              <LoginPage
+                handleSignIn={handleSignIn}
+                handleMockSignIn={handleMockSignIn}
+                notificationsRef={notificationsRef}
+                notificationsOpen={notificationsOpen}
+                setNotificationsOpen={setNotificationsOpen}
+                unreadCount={unreadCount}
+                toggleNotifications={toggleNotifications}
+                markAllNotificationsRead={markAllNotificationsRead}
+                notifications={notifications}
+                markNotificationRead={markNotificationRead}
+              />
+            )
+          }
+        />
+        {/* Redirect from backend */}
+        <Route
+          path="/auth-callback"
+          element={<AuthCallback onLoginSuccess={handleSuccessfulLogin} />}
+        />
+        {/* Invalid domain login */}
+        <Route path="/invalid-domain" element={<InvalidDomainPage />} />
+        {/* Protected routes */}
+        <Route
+          element={
+            authenticated ? (
+              <FacultyRoute
+                authenticated={authenticated}
+                role={role}
+                handleLogout={handleLogout}
+                unreadCount={unreadCount}
+                notificationsOpen={notificationsOpen}
+                setNotificationsOpen={setNotificationsOpen}
+                toggleNotifications={toggleNotifications}
+                markAllNotificationsRead={markAllNotificationsRead}
+                notifications={notifications}
+                markNotificationRead={markNotificationRead}
+                notificationsRef={notificationsRef}
+                selectedEntryId={selectedEntryId}
+              />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        >
+          <Route
+            path="/dashboard"
+            element={
+              <DashboardListView
+                search={search}
+                setSearch={setSearch}
+                filteredEntries={filteredEntries}
+                selectEntry={selectEntry}
+                statusClasses={statusClasses}
+                statusLabels={statusLabels}
+              />
             }
           />
-          {/* Redirect from backend */}
           <Route
-            path="/auth-callback"
-            element={<AuthCallback onLoginSuccess={handleSuccessfulLogin} />}
-          />
-          {/* Invalid domain login */}
-          <Route path="/invalid-domain" element={<InvalidDomainPage />} />
-          {/* Protected routes */}
-          <Route
+            path="/dashboard/create"
             element={
-              authenticated ? (
-                <FacultyRoute
-                  authenticated={authenticated}
-                  role={role}
-                  handleLogout={handleLogout}
-                  unreadCount={unreadCount}
-                  notificationsOpen={notificationsOpen}
-                  setNotificationsOpen={setNotificationsOpen}
-                  toggleNotifications={toggleNotifications}
-                  markAllNotificationsRead={markAllNotificationsRead}
-                  notifications={notifications}
-                  markNotificationRead={markNotificationRead}
-                  notificationsRef={notificationsRef}
-                  selectedEntryId={selectedEntryId}
-                />
-              ) : (
-                <Navigate to="/" replace />
-              )
-            }
-          >
-            <Route
-              path="/dashboard"
-              element={
-                <DashboardListView
-                  search={search}
-                  setSearch={setSearch}
-                  filteredEntries={filteredEntries}
-                  selectEntry={selectEntry}
-                  statusClasses={statusClasses}
-                  statusLabels={statusLabels}
-                />
-              }
-            />
-            <Route
-              path="/dashboard/create"
-              element={
-                <CreateEntryView
-                  entryDraft={entryDraft}
-                  shortId={shortId}
-                  nowStamp={nowStamp}
-                  userEmail={userEmail}
-                  emptyEntry={emptyEntry}
-                  setEntries={setEntries}
-                  setSelectedEntryId={setSelectedEntryId}
-                  setEntryDraft={setEntryDraft}
-                  addEntryNotification={addEntryNotification}
-                />
-              }
-            />
-            <Route
-              path="/dashboard/entries/:entryId/edit"
-              element={
-                <EditEntryView
-                  selectedEntry={selectedEntry}
-                  selectedEntryId={selectedEntryId}
-                  userEmail={userEmail}
-                  commitMessage={commitMessage}
-                  shortId={shortId}
-                  nowStamp={nowStamp}
-                  entryDraft={entryDraft}
-                  setEntries={setEntries}
-                  setCommitMessage={setCommitMessage}
-                  addEntryNotification={addEntryNotification}
-                  setEntryDraft={setEntryDraft}
-                  setSelectedEntryId={setSelectedEntryId}
-                />
-              }
-            />
-            <Route
-              path="/dashboard/entries/:entryId"
-              element={
-                <DashboardDetailView
-                  sidebarCollapsed={sidebarCollapsed}
-                  setSidebarCollapsed={setSidebarCollapsed}
-                  setSearch={setSearch}
-                  search={search}
-                  filteredEntries={filteredEntries}
-                  statusLabels={statusLabels}
-                  selectedEntry={selectedEntry}
-                  userEmail={userEmail}
-                  statusClasses={statusClasses}
-                  shortId={shortId}
-                  nowStamp={nowStamp}
-                  setEntries={setEntries}
-                  addEntryNotification={addEntryNotification}
-                  setSelectedVersion={setSelectedVersion}
-                  selectedVersion={selectedVersion}
-                  selectedEntryId={selectedEntryId}
-                  selectEntry={selectEntry}
-                  isAdmin={isAdmin}
-                />
-              }
-            />
-          </Route>
-          <Route
-            element={
-              authenticated ? (
-                <AdminRoute
-                  authenticated={authenticated}
-                  role={role}
-                  handleLogout={handleLogout}
-                  unreadCount={unreadCount}
-                  notificationsOpen={notificationsOpen}
-                  setNotificationsOpen={setNotificationsOpen}
-                  toggleNotifications={toggleNotifications}
-                  markAllNotificationsRead={markAllNotificationsRead}
-                  notifications={notifications}
-                  markNotificationRead={markNotificationRead}
-                  notificationsRef={notificationsRef}
-                />
-              ) : (
-                <Navigate to="/" replace />
-              )
-            }
-          >
-            <Route path="/admin" element={<AdminDashboard />} />
-          </Route>
-          <Route
-            path="*"
-            element={
-              <Navigate to={authenticated ? "/dashboard" : "/"} replace />
+              <CreateEntryView
+                entryDraft={entryDraft}
+                shortId={shortId}
+                nowStamp={nowStamp}
+                userEmail={userEmail}
+                emptyEntry={emptyEntry}
+                setEntries={setEntries}
+                setSelectedEntryId={setSelectedEntryId}
+                setEntryDraft={setEntryDraft}
+                addEntryNotification={addEntryNotification}
+              />
             }
           />
-        </Routes>
-      )}
+          <Route
+            path="/dashboard/entries/:entryId/edit"
+            element={
+              <EditEntryView
+                selectedEntry={selectedEntry}
+                selectedEntryId={selectedEntryId}
+                userEmail={userEmail}
+                commitMessage={commitMessage}
+                shortId={shortId}
+                nowStamp={nowStamp}
+                entryDraft={entryDraft}
+                setEntries={setEntries}
+                setCommitMessage={setCommitMessage}
+                addEntryNotification={addEntryNotification}
+                setEntryDraft={setEntryDraft}
+                setSelectedEntryId={setSelectedEntryId}
+              />
+            }
+          />
+          <Route
+            path="/dashboard/entries/:entryId"
+            element={
+              <DashboardDetailView
+                sidebarCollapsed={sidebarCollapsed}
+                setSidebarCollapsed={setSidebarCollapsed}
+                setSearch={setSearch}
+                search={search}
+                filteredEntries={filteredEntries}
+                statusLabels={statusLabels}
+                selectedEntry={selectedEntry}
+                userEmail={userEmail}
+                statusClasses={statusClasses}
+                shortId={shortId}
+                nowStamp={nowStamp}
+                setEntries={setEntries}
+                addEntryNotification={addEntryNotification}
+                setSelectedVersion={setSelectedVersion}
+                selectedVersion={selectedVersion}
+                selectedEntryId={selectedEntryId}
+                selectEntry={selectEntry}
+                isAdmin={isAdmin}
+              />
+            }
+          />
+        </Route>
+        <Route
+          element={
+            authenticated ? (
+              <AdminRoute
+                authenticated={authenticated}
+                role={role}
+                handleLogout={handleLogout}
+                unreadCount={unreadCount}
+                notificationsOpen={notificationsOpen}
+                setNotificationsOpen={setNotificationsOpen}
+                toggleNotifications={toggleNotifications}
+                markAllNotificationsRead={markAllNotificationsRead}
+                notifications={notifications}
+                markNotificationRead={markNotificationRead}
+                notificationsRef={notificationsRef}
+              />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        >
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Route>
+        <Route
+          path="*"
+          element={<Navigate to={authenticated ? "/dashboard" : "/"} replace />}
+        />
+      </Routes>
     </main>
   );
 }
 
+// ✅ PLACE THIS OUTSIDE OF THE App() COMPONENT BLOCK
 function AuthCallback({
   onLoginSuccess,
 }: {
@@ -1010,25 +990,47 @@ function AuthCallback({
     if (hasFetched.current) return;
     hasFetched.current = true;
 
-    const verifySession = async () => {
+    const finalizeAndVerify = async () => {
       try {
-        const res = await fetch("/api/auth/me", { credentials: "include" });
-        if (res.ok) {
-          const body = await res.json();
-          const user = body.user ?? body;
-          if (user.email) {
-            onLoginSuccess(user);
-            return;
-          }
+        const urlParams = new URLSearchParams(window.location.search);
+        const tempToken = urlParams.get("token");
+
+        if (!tempToken) {
+          throw new Error("No token provided in redirect URL");
         }
 
-        // Domain check and redirect
-        if (res.status === 403) {
-          const errorData = await res.json();
-          if (errorData.error === "invalid_domain") {
-            navigate("/invalid-domain", { replace: true });
-            return;
+        // 1. Instantly strip token from address bar to prevent double-fetch loops
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
+
+        // 2. Submit the token to backend via proxy route
+        const res = await fetch("/api/auth/finalize-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: tempToken }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok && data.email) {
+          // 3. Commit user data to parent state
+          onLoginSuccess(data);
+
+          // 4. Perform localized execution routing instantly
+          if (data.role === "admin") {
+            navigate("/admin", { replace: true });
+          } else {
+            navigate("/dashboard", { replace: true });
           }
+          return;
+        }
+
+        if (res.status === 403 && data.error === "invalid_domain") {
+          navigate("/invalid-domain", { replace: true });
+          return;
         }
 
         navigate("/", { replace: true });
@@ -1038,7 +1040,7 @@ function AuthCallback({
       }
     };
 
-    verifySession();
+    finalizeAndVerify();
   }, [onLoginSuccess, navigate]);
 
   return (
