@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NotificationItem } from "@/types";
 
 interface LoginPageProps {
@@ -25,6 +26,14 @@ export default function LoginPage({
   notifications,
   markNotificationRead,
 }: LoginPageProps) {
+  // Local state to manage the Google OAuth redirect lag
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  const onGoogleClick = () => {
+    setIsRedirecting(true);
+    handleSignIn();
+  };
+
   return (
     <main className="min-h-screen bg-surface-200 flex items-center justify-center">
       <div className="w-full max-w-sm p-8 text-center rounded-[1.75rem] border border-surface-200 bg-white shadow-soft">
@@ -130,11 +139,43 @@ export default function LoginPage({
           Sign in to access the publications dashboard
         </p>
 
+        {/* UPDATED GOOGLE SIGN IN BUTTON */}
         <button
-          className="w-full rounded-2xl bg-brand-800 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-700 shadow-md transition"
-          onClick={handleSignIn}
+          className="flex w-full items-center justify-center gap-3 rounded-2xl bg-brand-800 px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={onGoogleClick}
+          disabled={isRedirecting}
         >
-          Sign in with Google
+          {isRedirecting ? (
+            <svg
+              className="h-4 w-4 animate-spin text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+          ) : (
+            <img
+              src="https://www.svgrepo.com/show/355037/google.svg"
+              alt="Google"
+              className="h-4 w-4 brightness-0 invert"
+            />
+          )}
+          <span>
+            {isRedirecting ? "Connecting to Google..." : "Sign in with Google"}
+          </span>
         </button>
 
         <div className="my-6 flex items-center justify-center gap-2">
@@ -150,7 +191,8 @@ export default function LoginPage({
             Development Mock Sign In
           </p>
           <button
-            className="w-full rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm font-semibold text-brand-950 hover:bg-surface-100 transition"
+            className="w-full rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm font-semibold text-brand-950 hover:bg-surface-100 transition disabled:opacity-50"
+            disabled={isRedirecting}
             onClick={() =>
               handleMockSignIn(
                 "faculty1@vnrvjiet.in",
@@ -162,7 +204,8 @@ export default function LoginPage({
             🔑 Sign in as Dr. Meera Iyer (Faculty)
           </button>
           <button
-            className="w-full rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm font-semibold text-brand-950 hover:bg-surface-100 transition"
+            className="w-full rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm font-semibold text-brand-950 hover:bg-surface-100 transition disabled:opacity-50"
+            disabled={isRedirecting}
             onClick={() =>
               handleMockSignIn(
                 "faculty2@vnrvjiet.in",
@@ -174,7 +217,8 @@ export default function LoginPage({
             🔑 Sign in as Prof. Ananya Rao (Faculty)
           </button>
           <button
-            className="w-full rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm font-semibold text-brand-950 hover:bg-surface-100 transition"
+            className="w-full rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm font-semibold text-brand-950 hover:bg-surface-100 transition disabled:opacity-50"
+            disabled={isRedirecting}
             onClick={() =>
               handleMockSignIn("admin1@vnrvjiet.in", "admin", "Admin User")
             }
