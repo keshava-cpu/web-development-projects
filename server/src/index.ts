@@ -124,11 +124,20 @@ app.get("/api/auth/google/callback", async (request, response) => {
     const emailDomain = email.split("@")[1];
 
     if (emailDomain !== allowedDomain) {
-      response.status(403).json({
-        error: "invalid_domain",
-        message: `Only ${allowedDomain} email addresses are allowed`,
-      });
-      return;
+      // Check if the request was made by a frontend client-side fetch API call
+      const isFetchRequest =
+        request.headers["sec-fetch-mode"] === "cors" || request.xhr;
+
+      if (isFetchRequest) {
+        return response.status(403).json({
+          error: "invalid_domain",
+          message: `Only ${allowedDomain} email addresses are allowed`,
+        });
+      }
+
+      // 🚀 IF A DIRECT BROWSER RELOAD/REDIRECT HITS THIS, SEND THEM TO THE FRONTEND ERROR PAGE NATIVELY
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      return response.redirect(`${frontendUrl}/invalid-domain`);
     }
 
     const role = adminEmails.includes(email) ? "admin" : "faculty";

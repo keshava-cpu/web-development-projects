@@ -29,6 +29,7 @@ import DashboardDetailView from "./pages/faculty/DashboardDetailView";
 import AdminRoute from "./routes/AdminRoute";
 import FacultyRoute from "./routes/FacultyRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import LoginPage from "./views/LoginPage";
 
 // type AuthMode = "google" | "manual";
 // type Tab = "dashboard" | "messages" | "review";
@@ -288,7 +289,7 @@ function App() {
       } else if (user.role === "admin") {
         navigate("/admin");
       } else {
-        navigate("/error");
+        navigate("/invalid-domain");
       }
     },
     [navigate, addEntryNotification],
@@ -358,9 +359,11 @@ function App() {
   useEffect(() => {
     if (notificationsOpen) {
       // focus after render
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         notificationsPanelRef.current?.focus();
       }, 0);
+
+      return clearTimeout(timeoutId);
     }
   }, [notificationsOpen]);
 
@@ -407,11 +410,11 @@ function App() {
         method: "POST",
         credentials: "include",
       });
+      navigate("/", { replace: true });
       setAuthenticated(false);
       setRole(initialRole);
       setUserEmail("");
       setIsAdmin(false);
-      navigate("/");
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -617,192 +620,200 @@ function App() {
   //   setDirectMessageText("");
   // }
 
-  if (!authenticated) {
-    const pathname = window.location.pathname;
-    if (pathname === "/dashboard") {
-      return (
-        <main className="min-h-screen bg-surface-50 flex items-center justify-center">
-          <div className="w-full max-w-md p-8 text-center rounded-2xl border bg-white">
-            <h2 className="text-xl font-semibold">Invalid access</h2>
-            <p className="mt-2 text-sm text-muted">
-              You must be signed in with Google to view the dashboard.
-            </p>
-            <div className="mt-6">
-              <button
-                className="rounded-2xl bg-brand-800 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-                onClick={() => (window.location.href = "/")}
-              >
-                Go to sign in
-              </button>
-            </div>
-          </div>
-        </main>
-      );
-    }
+  // if (location.pathname === "/invalid-domain") {
+  //   return (
+  //     <Routes>
+  //       <Route path="/invalid-domain" element={<InvalidDomainPage />} />
+  //     </Routes>
+  //   );
+  // }
 
-    return (
-      <main className="min-h-screen bg-surface-200 flex items-center justify-center">
-        <div className="w-full max-w-sm p-8 text-center rounded-[1.75rem] border border-surface-200 bg-white shadow-soft">
-          <div className="relative flex items-center justify-center">
-            <h1 className="mb-2 text-2xl font-bold text-brand-950">
-              College R&D
-            </h1>
-            <div className="absolute left-6">
-              <div className="relative" ref={notificationsRef}>
-                <button
-                  aria-label={`Notifications (${unreadCount} unread)`}
-                  aria-haspopup="true"
-                  aria-expanded={notificationsOpen}
-                  aria-controls="notifications-panel"
-                  onClick={toggleNotifications}
-                  className="relative rounded-full border border-white/20 bg-transparent p-2 text-sm"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                    />
-                  </svg>
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">
-                      {unreadCount}
-                    </span>
-                  )}
-                </button>
+  // if (!authenticated) {
+  //   const pathname = window.location.pathname;
+  //   if (pathname === "/dashboard") {
+  //     return (
+  //       <main className="min-h-screen bg-surface-50 flex items-center justify-center">
+  //         <div className="w-full max-w-md p-8 text-center rounded-2xl border bg-white">
+  //           <h2 className="text-xl font-semibold">Invalid access</h2>
+  //           <p className="mt-2 text-sm text-muted">
+  //             You must be signed in with Google to view the dashboard.
+  //           </p>
+  //           <div className="mt-6">
+  //             <button
+  //               className="rounded-2xl bg-brand-800 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+  //               onClick={() => (window.location.href = "/")}
+  //             >
+  //               Go to sign in
+  //             </button>
+  //           </div>
+  //         </div>
+  //       </main>
+  //     );
+  //   }
 
-                {notificationsOpen && (
-                  <div
-                    id="notifications-panel"
-                    role="dialog"
-                    aria-label="Notifications"
-                    className="absolute right-0 z-50 mt-2 w-80 rounded-lg bg-white text-black shadow-lg"
-                  >
-                    <div className="flex items-center justify-between border-b p-3">
-                      <strong>Notifications</strong>
-                      <div className="flex items-center gap-2">
-                        <button
-                          className="text-sm text-muted"
-                          onClick={markAllNotificationsRead}
-                        >
-                          Mark all read
-                        </button>
-                        <button
-                          className="text-sm"
-                          onClick={() => setNotificationsOpen(false)}
-                        >
-                          Close
-                        </button>
-                      </div>
-                    </div>
-                    <ul className="max-h-64 overflow-auto p-2">
-                      {notifications.length === 0 && (
-                        <li className="p-2 text-sm text-muted">
-                          No notifications
-                        </li>
-                      )}
-                      {notifications.map((n) => (
-                        <li
-                          key={n.id}
-                          className={`flex items-start gap-2 p-2 ${n.unread ? "bg-surface-50" : ""}`}
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <div className="text-sm font-medium">
-                                {n.title}
-                              </div>
-                              <div className="text-xs text-muted">
-                                {n.createdAt}
-                              </div>
-                            </div>
-                            <div className="mt-1 text-sm text-muted">
-                              {n.detail}
-                            </div>
-                          </div>
-                          {n.unread && (
-                            <button
-                              className="ml-2 text-sm"
-                              onClick={() => markNotificationRead(n.id)}
-                              aria-label="Mark as read"
-                            >
-                              Mark
-                            </button>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <p className="mb-6 text-sm text-muted">
-            Sign in to access the publications dashboard
-          </p>
+  //   return (
+  //     <main className="min-h-screen bg-surface-200 flex items-center justify-center">
+  //       <div className="w-full max-w-sm p-8 text-center rounded-[1.75rem] border border-surface-200 bg-white shadow-soft">
+  //         <div className="relative flex items-center justify-center">
+  //           <h1 className="mb-2 text-2xl font-bold text-brand-950">
+  //             College R&D
+  //           </h1>
+  //           <div className="absolute left-6">
+  //             <div className="relative" ref={notificationsRef}>
+  //               <button
+  //                 aria-label={`Notifications (${unreadCount} unread)`}
+  //                 aria-haspopup="true"
+  //                 aria-expanded={notificationsOpen}
+  //                 aria-controls="notifications-panel"
+  //                 onClick={toggleNotifications}
+  //                 className="relative rounded-full border border-white/20 bg-transparent p-2 text-sm"
+  //               >
+  //                 <svg
+  //                   xmlns="http://www.w3.org/2000/svg"
+  //                   className="h-5 w-5"
+  //                   fill="none"
+  //                   viewBox="0 0 24 24"
+  //                   stroke="currentColor"
+  //                 >
+  //                   <path
+  //                     strokeLinecap="round"
+  //                     strokeLinejoin="round"
+  //                     strokeWidth={2}
+  //                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+  //                   />
+  //                 </svg>
+  //                 {unreadCount > 0 && (
+  //                   <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">
+  //                     {unreadCount}
+  //                   </span>
+  //                 )}
+  //               </button>
 
-          <button
-            className="w-full rounded-2xl bg-brand-800 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-700 shadow-md transition"
-            onClick={handleSignIn}
-          >
-            Sign in with Google
-          </button>
+  //               {notificationsOpen && (
+  //                 <div
+  //                   id="notifications-panel"
+  //                   role="dialog"
+  //                   aria-label="Notifications"
+  //                   className="absolute right-0 z-50 mt-2 w-80 rounded-lg bg-white text-black shadow-lg"
+  //                 >
+  //                   <div className="flex items-center justify-between border-b p-3">
+  //                     <strong>Notifications</strong>
+  //                     <div className="flex items-center gap-2">
+  //                       <button
+  //                         className="text-sm text-muted"
+  //                         onClick={markAllNotificationsRead}
+  //                       >
+  //                         Mark all read
+  //                       </button>
+  //                       <button
+  //                         className="text-sm"
+  //                         onClick={() => setNotificationsOpen(false)}
+  //                       >
+  //                         Close
+  //                       </button>
+  //                     </div>
+  //                   </div>
+  //                   <ul className="max-h-64 overflow-auto p-2">
+  //                     {notifications.length === 0 && (
+  //                       <li className="p-2 text-sm text-muted">
+  //                         No notifications
+  //                       </li>
+  //                     )}
+  //                     {notifications.map((n) => (
+  //                       <li
+  //                         key={n.id}
+  //                         className={`flex items-start gap-2 p-2 ${n.unread ? "bg-surface-50" : ""}`}
+  //                       >
+  //                         <div className="flex-1">
+  //                           <div className="flex items-center justify-between">
+  //                             <div className="text-sm font-medium">
+  //                               {n.title}
+  //                             </div>
+  //                             <div className="text-xs text-muted">
+  //                               {n.createdAt}
+  //                             </div>
+  //                           </div>
+  //                           <div className="mt-1 text-sm text-muted">
+  //                             {n.detail}
+  //                           </div>
+  //                         </div>
+  //                         {n.unread && (
+  //                           <button
+  //                             className="ml-2 text-sm"
+  //                             onClick={() => markNotificationRead(n.id)}
+  //                             aria-label="Mark as read"
+  //                           >
+  //                             Mark
+  //                           </button>
+  //                         )}
+  //                       </li>
+  //                     ))}
+  //                   </ul>
+  //                 </div>
+  //               )}
+  //             </div>
+  //           </div>
+  //         </div>
+  //         <p className="mb-6 text-sm text-muted">
+  //           Sign in to access the publications dashboard
+  //         </p>
 
-          <div className="my-6 flex items-center justify-center gap-2">
-            <span className="h-px w-full bg-surface-200" />
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
-              or
-            </span>
-            <span className="h-px w-full bg-surface-200" />
-          </div>
+  //         <button
+  //           className="w-full rounded-2xl bg-brand-800 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-700 shadow-md transition"
+  //           onClick={handleSignIn}
+  //         >
+  //           Sign in with Google
+  //         </button>
 
-          <div className="space-y-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted mb-2">
-              Development Mock Sign In
-            </p>
-            <button
-              className="w-full rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm font-semibold text-brand-950 hover:bg-surface-100 transition"
-              onClick={() =>
-                handleMockSignIn(
-                  "faculty1@vnrvjiet.in",
-                  "faculty",
-                  "Dr. Meera Iyer",
-                )
-              }
-            >
-              🔑 Sign in as Dr. Meera Iyer (Faculty)
-            </button>
-            <button
-              className="w-full rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm font-semibold text-brand-950 hover:bg-surface-100 transition"
-              onClick={() =>
-                handleMockSignIn(
-                  "faculty2@vnrvjiet.in",
-                  "faculty",
-                  "Prof. Ananya Rao",
-                )
-              }
-            >
-              🔑 Sign in as Prof. Ananya Rao (Faculty)
-            </button>
-            <button
-              className="w-full rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm font-semibold text-brand-950 hover:bg-surface-100 transition"
-              onClick={() =>
-                handleMockSignIn("admin1@vnrvjiet.in", "admin", "Admin User")
-              }
-            >
-              🔑 Sign in as Admin User (Admin)
-            </button>
-          </div>
-        </div>
-      </main>
-    );
-  }
+  //         <div className="my-6 flex items-center justify-center gap-2">
+  //           <span className="h-px w-full bg-surface-200" />
+  //           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+  //             or
+  //           </span>
+  //           <span className="h-px w-full bg-surface-200" />
+  //         </div>
+
+  //         <div className="space-y-3">
+  //           <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted mb-2">
+  //             Development Mock Sign In
+  //           </p>
+  //           <button
+  //             className="w-full rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm font-semibold text-brand-950 hover:bg-surface-100 transition"
+  //             onClick={() =>
+  //               handleMockSignIn(
+  //                 "faculty1@vnrvjiet.in",
+  //                 "faculty",
+  //                 "Dr. Meera Iyer",
+  //               )
+  //             }
+  //           >
+  //             🔑 Sign in as Dr. Meera Iyer (Faculty)
+  //           </button>
+  //           <button
+  //             className="w-full rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm font-semibold text-brand-950 hover:bg-surface-100 transition"
+  //             onClick={() =>
+  //               handleMockSignIn(
+  //                 "faculty2@vnrvjiet.in",
+  //                 "faculty",
+  //                 "Prof. Ananya Rao",
+  //               )
+  //             }
+  //           >
+  //             🔑 Sign in as Prof. Ananya Rao (Faculty)
+  //           </button>
+  //           <button
+  //             className="w-full rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 text-sm font-semibold text-brand-950 hover:bg-surface-100 transition"
+  //             onClick={() =>
+  //               handleMockSignIn("admin1@vnrvjiet.in", "admin", "Admin User")
+  //             }
+  //           >
+  //             🔑 Sign in as Admin User (Admin)
+  //           </button>
+  //         </div>
+  //       </div>
+  //     </main>
+  //   );
+  // }
 
   return (
     <main className="min-h-screen bg-surface-50">
@@ -936,12 +947,49 @@ function App() {
         </section>
       ) : (
         <Routes>
+          {/* Login */}
+          <Route
+            path="/"
+            element={
+              authenticated ? (
+                role === "admin" ? (
+                  <Navigate to="/admin" replace />
+                ) : (
+                  <Navigate to="/dashboard" replace />
+                )
+              ) : (
+                <LoginPage
+                  handleSignIn={handleSignIn}
+                  handleMockSignIn={handleMockSignIn}
+                  notificationsRef={notificationsRef}
+                  notificationsOpen={notificationsOpen}
+                  setNotificationsOpen={setNotificationsOpen}
+                  unreadCount={unreadCount}
+                  toggleNotifications={toggleNotifications}
+                  markAllNotificationsRead={markAllNotificationsRead}
+                  notifications={notifications}
+                  markNotificationRead={markNotificationRead}
+                />
+              )
+            }
+          />
+          {/* Redirect from backend */}
           <Route
             path="/auth-callback"
             element={<AuthCallback onLoginSuccess={handleSuccessfulLogin} />}
           />
-
-          <Route element={<FacultyRoute role={role} />}>
+          {/* Invalid domain login */}
+          <Route path="/invalid-domain" element={<InvalidDomainPage />} />
+          {/* Protected routes */}
+          <Route
+            element={
+              authenticated ? (
+                <FacultyRoute role={role} />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
+          >
             <Route
               path="/dashboard"
               element={
@@ -1017,11 +1065,24 @@ function App() {
                 />
               }
             />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>
-          <Route element={<AdminRoute role={role} />}>
+          <Route
+            element={
+              authenticated ? (
+                <AdminRoute role={role} />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
+          >
             <Route path="/admin" element={<AdminDashboard />} />
           </Route>
+          <Route
+            path="*"
+            element={
+              <Navigate to={authenticated ? "/dashboard" : "/"} replace />
+            }
+          />
         </Routes>
       )}
     </main>
@@ -1055,6 +1116,16 @@ function AuthCallback({
             return;
           }
         }
+
+        // Domain check and redirect
+        if (res.status === 403) {
+          const errorData = await res.json();
+          if (errorData.error === "invalid_domain") {
+            navigate("/invalid-domain", { replace: true });
+            return;
+          }
+        }
+
         navigate("/", { replace: true });
       } catch (err) {
         console.error("Error verifying authentication session:", err);
@@ -1071,6 +1142,50 @@ function AuthCallback({
       <p className="mt-4 text-sm font-medium text-brand-950">
         Completing secure login...
       </p>
+    </div>
+  );
+}
+
+function InvalidDomainPage() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="flex h-screen w-screen flex-col items-center justify-center bg-slate-50 px-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-sm border border-slate-100 text-center">
+        {/* Warning Icon */}
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600">
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="2"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+        </div>
+
+        <h1 className="mt-4 text-xl font-semibold text-slate-900">
+          Invalid Email Domain
+        </h1>
+
+        <p className="mt-2 text-sm text-slate-600">
+          Your organization account is not authorized to access this platform.
+          Please log in using an approved institutional email address.
+        </p>
+
+        {/* Redirect Button back to Root Login page */}
+        <button
+          onClick={() => navigate("/", { replace: true })}
+          className="mt-6 w-full rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-700/50"
+        >
+          Back to Login
+        </button>
+      </div>
     </div>
   );
 }
