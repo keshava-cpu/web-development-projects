@@ -106,7 +106,13 @@ app.get("/api/auth/google/callback", async (request, response) => {
   }
 
   try {
-    const { tokens } = await googleClient.getToken(code as string);
+    // changed here
+    const { tokens } = await googleClient.getToken({
+      code: code as string,
+      redirect_uri:
+        process.env.GOOGLE_REDIRECT_URI ||
+        "https://testing-publications-page.onrender.com/api/auth/google/callback",
+    });
     googleClient.setCredentials(tokens);
 
     const ticket = await googleClient.verifyIdToken({
@@ -136,7 +142,9 @@ app.get("/api/auth/google/callback", async (request, response) => {
       }
 
       // 🚀 IF A DIRECT BROWSER RELOAD/REDIRECT HITS THIS, SEND THEM TO THE FRONTEND ERROR PAGE NATIVELY
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      const frontendUrl =
+        process.env.FRONTEND_URL ||
+        "https://testing-publications-page-web.vercel.app";
       return response.redirect(`${frontendUrl}/invalid-domain`);
     }
 
@@ -154,17 +162,20 @@ app.get("/api/auth/google/callback", async (request, response) => {
     response.cookie("auth_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return response.redirect("http://localhost:5173/auth-callback");
+    const frontendTarget =
+      process.env.FRONTEND_URL ||
+      "https://testing-publications-page-web.vercel.app";
+    return response.redirect(`${frontendTarget}/auth-callback`);
   } catch (error) {
     console.error("OAuth error:", error);
-    response.status(500).json({
-      error: "oauth_failed",
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    const frontendTarget =
+      process.env.FRONTEND_URL ||
+      "https://testing-publications-page-web.vercel.app";
+    return response.redirect(`${frontendTarget}/?error=oauth_failed`);
   }
 });
 
