@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import {
   Navigate,
   Route,
@@ -122,9 +122,9 @@ function App() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const notificationsRef = useRef<HTMLDivElement | null>(null);
   const notificationsPanelRef = useRef<HTMLDivElement | null>(null);
-  const popupRef = useRef<Window | null>(null);
-  const pollRef = useRef<number | null>(null);
-  const signInHandledRef = useRef(false);
+  // const popupRef = useRef<Window | null>(null);
+  // const pollRef = useRef<number | null>(null); (trying to remove this...)
+  // const signInHandledRef = useRef(false);
   // const [createOpen, setCreateOpen] = useState(false);
   const [entryDraft, setEntryDraft] = useState(emptyEntry);
   // const [messageText, setMessageText] = useState("");
@@ -158,31 +158,31 @@ function App() {
     }
   }, [authenticated]);
 
-  useEffect(() => {
-    function handleAuthMessage(event: MessageEvent) {
-      const data = event.data;
-      if (!data || data.type !== "oauth-success" || signInHandledRef.current) {
-        return;
-      }
+  // useEffect(() => {
+  //   function handleAuthMessage(event: MessageEvent) {
+  //     const data = event.data;
+  //     if (!data || data.type !== "oauth-success" || signInHandledRef.current) {
+  //       return;
+  //     }
 
-      const user = data.user;
-      if (!user?.email) {
-        return;
-      }
+  //     const user = data.user;
+  //     if (!user?.email) {
+  //       return;
+  //     }
 
-      signInHandledRef.current = true;
+  //     signInHandledRef.current = true;
 
-      if (pollRef.current !== null) {
-        window.clearInterval(pollRef.current);
-        pollRef.current = null;
-      }
+  //     if (pollRef.current !== null) {
+  //       window.clearInterval(pollRef.current);
+  //       pollRef.current = null;
+  //     }
 
-      handleSuccessfulLogin(user);
-    }
+  //     handleSuccessfulLogin(user);
+  //   }
 
-    window.addEventListener("message", handleAuthMessage);
-    return () => window.removeEventListener("message", handleAuthMessage);
-  }, []);
+  //   window.addEventListener("message", handleAuthMessage);
+  //   return () => window.removeEventListener("message", handleAuthMessage);
+  // }, []);
 
   const activeEntryId = routeEntryId ?? selectedEntryId;
   const selectedEntry =
@@ -253,29 +253,46 @@ function App() {
     navigate(`/dashboard/entries/${entryId}`);
   }
 
-  function handleSuccessfulLogin(user: {
-    email: string;
-    name?: string;
-    role?: string;
-  }) {
-    if (popupRef.current && !popupRef.current.closed) {
-      popupRef.current.close();
-    }
+  const addEntryNotification = useCallback(
+    (title: string, detail: string, queue = false) => {
+      const item: NotificationItem = {
+        id: shortId(),
+        title,
+        detail,
+        createdAt: nowStamp(),
+        unread: true,
+      };
+      if (queue) {
+        // setQueuedNotifications((current) => [...current, item]);
+        // return;
+      }
+      setNotifications((current) => [item, ...current]);
+    },
+    [],
+  );
 
-    setAuthenticated(true);
-    setUserEmail(user.email || "");
-    setRole((user.role as Role) || initialRole);
+  const handleSuccessfulLogin = useCallback(
+    (user: { email: string; name?: string; role?: string }) => {
+      setAuthenticated(true);
+      setUserEmail(user.email || "");
+      setRole((user.role as Role) || initialRole);
 
-    const title = getLoginNotificationTitle(user.email);
-    const detail = user.name
-      ? `${user.name} signed in successfully.`
-      : `${user.email} signed in successfully.`;
-    addEntryNotification(title, detail);
+      const title = getLoginNotificationTitle(user.email);
+      const detail = user.name
+        ? `${user.name} signed in successfully.`
+        : `${user.email} signed in successfully.`;
+      addEntryNotification(title, detail);
 
-    if (user.role == "faculty") navigate("/dashboard");
-    else if (user.role == "admin") navigate("/admin");
-    else navigate("/error");
-  }
+      if (user.role === "faculty") {
+        navigate("/dashboard");
+      } else if (user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/error");
+      }
+    },
+    [navigate, addEntryNotification],
+  );
 
   // function releaseQueuedNotifications(nextQueue?: NotificationItem[]) {
   //   const queue = nextQueue ?? queuedNotifications;
@@ -298,21 +315,6 @@ function App() {
   //     }),
   //   );
   // }
-
-  function addEntryNotification(title: string, detail: string, queue = false) {
-    const item: NotificationItem = {
-      id: shortId(),
-      title,
-      detail,
-      createdAt: nowStamp(),
-      unread: true,
-    };
-    if (queue) {
-      // setQueuedNotifications((current) => [...current, item]);
-      // return;
-    }
-    setNotifications((current) => [item, ...current]);
-  }
 
   function markNotificationRead(id: string) {
     setNotifications((current) =>
@@ -439,94 +441,20 @@ function App() {
 
   async function handleSignIn() {
     try {
-      signInHandledRef.current = false;
       // Start the OAuth flow via backend which returns a redirect URL
       const response = await fetch("/api/auth/college-oauth/start", {
         credentials: "include",
       });
       const data = await response.json();
-      if (data.url) {
-        // Open OAuth in a popup and poll /api/auth/me until backend session is set
-        const width = 600;
-        const height = 700;
-        const left = window.screenX + (window.innerWidth - width) / 2;
-        const top = window.screenY + (window.innerHeight - height) / 2;
-        const popup = window.open(
-          data.url,
-          "oauth_popup",
-          `width=${width},height=${height},left=${left},top=${top}`,
-        );
-        popupRef.current = popup;
 
-        if (!popup) {
-          addEntryNotification(
-            "Popup blocked",
-            "Please allow popups for this site to sign in.",
-          );
-          return;
-        }
-
-        // Poll /api/auth/me until authenticated or timeout. Only navigate after success.
-        const start = Date.now();
-        const timeout = 60000; // 60s
-        const interval = 600; // slightly less frequent to reduce noisy 401s
-
-        const pollId = window.setInterval(async () => {
-          pollRef.current = pollId;
-          console.log(popup.closed, popup);
-          try {
-            const res = await fetch("/api/auth/me", { credentials: "include" });
-            if (res.ok) {
-              const body = await res.json();
-              const user = body.user ?? body;
-              console.log(user);
-              if (user.email) {
-                signInHandledRef.current = true;
-                clearInterval(pollId);
-                pollRef.current = null;
-                console.log("data got!!!!!!!!!!!!!!!");
-                handleSuccessfulLogin(user);
-                return;
-              }
-            } else if (res.status !== 401) {
-              // Only warn on unexpected non-auth errors to avoid spamming the console/network
-              console.warn("Auth check returned status", res.status);
-            }
-            // If user closed the popup, stop polling
-            if (popup.closed) {
-              clearInterval(pollId);
-              pollRef.current = null;
-              addEntryNotification(
-                "Sign in aborted",
-                "Popup was closed before completing sign-in.",
-              );
-              return;
-            }
-          } catch (e) {
-            console.log("Auth poll error:", e);
-          }
-
-          if (Date.now() - start > timeout) {
-            clearInterval(pollId);
-            pollRef.current = null;
-            if (!popup.closed) popup.close();
-            addEntryNotification(
-              "Sign in timed out",
-              "Could not verify sign-in.",
-            );
-          }
-        }, interval);
-      } else {
-        addEntryNotification(
-          "Sign in failed",
-          "No redirect URL returned from auth start.",
-        );
-      }
+      // redirecting to a new tab
+      window.location.href = data.url;
     } catch (error) {
+      // Showing error + adding notification
       console.error("Sign in error:", error);
       addEntryNotification(
         "Sign in failed",
-        "An error occurred during authentication.",
+        "Could not connect to the authentication server.",
       );
     }
   }
@@ -1008,6 +936,11 @@ function App() {
         </section>
       ) : (
         <Routes>
+          <Route
+            path="/auth-callback"
+            element={<AuthCallback onLoginSuccess={handleSuccessfulLogin} />}
+          />
+
           <Route element={<FacultyRoute role={role} />}>
             <Route
               path="/dashboard"
@@ -1092,6 +1025,53 @@ function App() {
         </Routes>
       )}
     </main>
+  );
+}
+
+function AuthCallback({
+  onLoginSuccess,
+}: {
+  onLoginSuccess: (user: {
+    email: string;
+    name?: string;
+    role?: string;
+  }) => void;
+}) {
+  const navigate = useNavigate();
+  const hasFetched = useRef(false);
+
+  useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
+    const verifySession = async () => {
+      try {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (res.ok) {
+          const body = await res.json();
+          const user = body.user ?? body;
+          if (user.email) {
+            onLoginSuccess(user);
+            return;
+          }
+        }
+        navigate("/", { replace: true });
+      } catch (err) {
+        console.error("Error verifying authentication session:", err);
+        navigate("/", { replace: true });
+      }
+    };
+
+    verifySession();
+  }, [onLoginSuccess, navigate]);
+
+  return (
+    <div className="flex h-screen w-screen flex-col items-center justify-center bg-surface-50">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-800 border-t-transparent"></div>
+      <p className="mt-4 text-sm font-medium text-brand-950">
+        Completing secure login...
+      </p>
+    </div>
   );
 }
 

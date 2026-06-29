@@ -149,19 +149,7 @@ app.get("/api/auth/google/callback", async (request, response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    response.type("html").send(`
-      <!doctype html>
-      <html>
-        <head>
-          <meta charset="utf-8" />
-          <title>Signing in...</title>
-        </head>
-        <body>
-          <h3>Signin complete, you can close this window now.</h3>
-          <script src="/api/auth/google/callback/complete.js?user=${encodeURIComponent(JSON.stringify(authPayload))}"></script>
-        </body>
-      </html>
-    `);
+    return response.redirect("http://localhost:5173/auth-callback");
   } catch (error) {
     console.error("OAuth error:", error);
     response.status(500).json({
