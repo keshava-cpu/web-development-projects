@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { NotificationItem } from "@/types";
+import ScrollToTop from "../components/ScrollToTop";
 
 interface FacultyRouteProps {
   authenticated: boolean;
@@ -208,6 +209,9 @@ const FacultyRoute: React.FC<FacultyRouteProps> = ({
       <div className="w-full flex-1 flex">
         <Outlet />
       </div>
+
+      {/* Scroll to top button */}
+      <ScrollToTop />
     </main>
   );
 };
