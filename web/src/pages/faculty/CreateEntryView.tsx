@@ -137,7 +137,7 @@ const CreateEntryView: React.FC<CreateEntryViewProps> = ({
                 console.error(err);
                 addEntryNotification(
                   "Creation failed",
-                  "Failed to save the entry to the server.",
+                  "Failed to save the entry to the server." + String(err),
                 );
               }
             }}
