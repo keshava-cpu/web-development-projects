@@ -63,6 +63,7 @@ app.use(
     credentials: true,
   }),
 );
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(verifyToken);
@@ -187,7 +188,7 @@ app.post("/api/auth/finalize-session", (request, response) => {
 
     response.cookie("auth_token", token, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });

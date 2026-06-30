@@ -1,11 +1,11 @@
 {
     "rewrites": [
         {
-            "source": "/api/(.*)",
-            "destination": "https://testing-publications-page.onrender.com/api/$1"
+            "source": "/api/:path*",
+            "destination": "https://testing-publications-page.onrender.com/api/:path*"
         },
         {
-            "source": "/(.*)",
+            "source": "/((?!api).*)",
             "destination": "/index.html"
         }
     ]
