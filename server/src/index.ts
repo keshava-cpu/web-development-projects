@@ -53,7 +53,10 @@ function verifyToken(request: Request, response: Response, next: NextFunction) {
 }
 
 // Danger
-app.set("trust proxy", 1);
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+  console.log("env val:", process.env.NODE_ENV);
+} else console.log(process.env.NODE_ENV, "production");
 
 app.use(
   helmet({
@@ -191,7 +194,7 @@ app.post("/api/auth/finalize-session", (request, response) => {
 
     response.cookie("auth_token", token, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
