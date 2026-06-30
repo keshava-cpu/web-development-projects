@@ -52,6 +52,9 @@ function verifyToken(request: Request, response: Response, next: NextFunction) {
   next();
 }
 
+// Danger
+app.set("trust proxy", 1);
+
 app.use(
   helmet({
     crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
