@@ -384,8 +384,11 @@ function App() {
           setUserEmail(data.email || "");
           setRole((data.role as Role) || initialRole);
           // If on root, navigate to dashboard
+          const userRole = data.role || initialRole;
+          setRole(userRole);
+
           if (window.location.pathname === "/") {
-            if (role === "admin") {
+            if (userRole === "admin") {
               navigate("/admin", { replace: true });
             } else {
               navigate("/dashboard", { replace: true });

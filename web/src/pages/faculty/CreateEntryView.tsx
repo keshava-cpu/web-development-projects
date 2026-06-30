@@ -121,7 +121,7 @@ const CreateEntryView: React.FC<CreateEntryViewProps> = ({
                 });
 
                 if (!response.ok) {
-                  console.log("response: ", response);
+                  console.log("response: ", String(response));
                   throw new Error("Failed to create entry on server");
                 }
 
