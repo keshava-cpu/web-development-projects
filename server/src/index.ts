@@ -52,8 +52,8 @@ function verifyToken(request: Request, response: Response, next: NextFunction) {
   next();
 }
 
-// Danger
-app.set("trust proxy", 1);
+// // Danger
+// app.set("trust proxy", 1);
 
 app.use(
   helmet({
@@ -273,6 +273,7 @@ app.get("/api/publications", (_request, response) => {
 
 app.post("/api/publications", (request, response) => {
   if (!request.user) {
+    console.log("No user Obj Found, un authorized user");
     response.status(401).json({ error: "not_authenticated" });
     return;
   }
