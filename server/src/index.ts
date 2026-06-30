@@ -141,10 +141,11 @@ app.get("/api/auth/google/callback", async (request, response) => {
         });
       }
 
-      // 🚀 IF A DIRECT BROWSER RELOAD/REDIRECT HITS THIS, SEND THEM TO THE FRONTEND ERROR PAGE NATIVELY
+      // IF A DIRECT BROWSER RELOAD/REDIRECT HITS THIS, SEND THEM TO THE FRONTEND ERROR PAGE NATIVELY
       const frontendUrl =
         process.env.FRONTEND_URL ||
         "https://testing-publications-page-web.vercel.app";
+
       return response.redirect(`${frontendUrl}/invalid-domain`);
     }
 
@@ -165,9 +166,11 @@ app.get("/api/auth/google/callback", async (request, response) => {
     return response.redirect(`${frontendTarget}/auth-callback?token=${token}`);
   } catch (error) {
     console.error("OAuth error:", error);
+
     const frontendTarget =
       process.env.FRONTEND_URL ||
       "https://testing-publications-page-web.vercel.app";
+
     return response.redirect(`${frontendTarget}/?error=oauth_failed`);
   }
 });
@@ -182,11 +185,9 @@ app.post("/api/auth/finalize-session", (request, response) => {
   try {
     const decoded = jwt.verify(token, jwtSecret) as AuthPayload;
 
-    // Changed sameSite from "none" to "lax" to match mock-login
-    // and keep it fully compatible with Vercel proxy rewrites
     response.cookie("auth_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
