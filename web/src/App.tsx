@@ -375,7 +375,10 @@ function App() {
   function checkAuthStatus() {
     fetch("/api/auth/me", { credentials: "include" })
       .then((res) => {
-        if (!res.ok) throw new Error("Not authenticated");
+        if (!res.ok) {
+          console.log("checkAuthStatus res has bad response");
+          throw new Error("Not authenticated");
+        }
         return res.json();
       })
       .then((data) => {
@@ -395,6 +398,7 @@ function App() {
             }
           }
         } else {
+          console.log("checkAuthStatus false is running....");
           setAuthenticated(false);
         }
       })
