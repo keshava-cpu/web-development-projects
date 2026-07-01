@@ -48,8 +48,7 @@ export default function AdminRoute({
             <p className="text-xs uppercase tracking-[0.3em] text-white/60">
               College R&D
             </p>
-            <h1 className="text-lg font-semibold">Admin Panel</h1>{" "}
-            {/* 👈 Customised for admin view */}
+            <h1 className="text-lg font-semibold">Admin Panel</h1>
           </div>
           <div className="flex items-center gap-3">
             {/* Notifications Panel Trigger */}

@@ -116,12 +116,14 @@ const FacultyRoute: React.FC<FacultyRouteProps> = ({
               onClick={() => navigate("/dashboard")}
               className="text-left transition hover:opacity-90"
             >
-              <p className="text-[10px] uppercase tracking-[0.32em] text-white/60">
-                College R&D
-              </p>
-              <h1 className="text-base font-semibold leading-tight">
-                Dashboard
-              </h1>
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.32em] text-white/60">
+                  College R&D
+                </p>
+                <h1 className="text-base font-semibold leading-tight">
+                  Dashboard
+                </h1>
+              </div>
             </button>
             <div className="flex items-center gap-3">
               {showAdminReturnButton && (

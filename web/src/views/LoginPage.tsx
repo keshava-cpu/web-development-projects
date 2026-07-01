@@ -1,4 +1,5 @@
 import { useState } from "react";
+import BrandLogo from "@/components/BrandLogo";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { NotificationItem } from "@/types";
 
@@ -39,9 +40,14 @@ export default function LoginPage({
     <main className="min-h-screen bg-surface-200 flex items-center justify-center">
       <div className="w-full max-w-sm p-8 text-center rounded-[1.75rem] border border-surface-200 bg-white shadow-soft">
         <div className="relative flex items-center justify-center">
-          <h1 className="mb-2 text-2xl font-bold text-brand-950">
-            College R&D
-          </h1>
+          <div className="mb-2 flex items-center gap-3 rounded-2xl bg-brand-50 px-3 py-2">
+            <BrandLogo
+              compact
+              className=""
+              iconClassName="h-11 w-11 bg-brand-950 text-brand-50"
+              textClassName=""
+            />
+          </div>
           <div className="absolute left-6">
             <div className="relative" ref={notificationsRef}>
               <button
