@@ -29,6 +29,7 @@ const FacultyRoute: React.FC<FacultyRouteProps> = ({
   notifications,
   notificationsRef,
   selectedEntryId,
+  markNotificationRead,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -97,6 +98,7 @@ const FacultyRoute: React.FC<FacultyRouteProps> = ({
                 <div
                   id="notifications-panel"
                   role="dialog"
+                  aria-label="Notifications"
                   className="absolute right-0 z-50 mt-2 w-80 rounded-lg bg-white text-black shadow-lg"
                 >
                   <div className="flex items-center justify-between border-b p-3">
@@ -138,6 +140,15 @@ const FacultyRoute: React.FC<FacultyRouteProps> = ({
                             {n.detail}
                           </div>
                         </div>
+                        {n.unread && (
+                          <button
+                            className="ml-2 text-sm"
+                            onClick={() => markNotificationRead(n.id)}
+                            aria-label="Mark as read"
+                          >
+                            Mark
+                          </button>
+                        )}
                       </li>
                     ))}
                   </ul>

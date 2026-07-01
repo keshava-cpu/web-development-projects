@@ -76,7 +76,7 @@ const EditEntryView: React.FC<EditEntryViewProps> = ({
       </nav>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 flex overflow-auto">
         {selectedEntry && selectedEntry.owner !== userEmail ? (
           <div className="mx-auto max-w-7xl px-6 py-6">
             <div className="rounded-xl border-2 border-warning/30 bg-warning/5 p-6">
