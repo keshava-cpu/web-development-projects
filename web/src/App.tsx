@@ -11,12 +11,16 @@ import {
 import {
   // departments,
   defaultNotifications,
+  directoryUsers,
+  findDirectoryUser,
   initialRole,
   sampleEntries,
 } from "./mockData";
 import {
   // ConversationMessage,
+  AppUser,
   EntryStatus,
+  FacultyProfileSummary,
   NotificationItem,
   PublicationEntry,
   Role,
@@ -29,6 +33,12 @@ import DashboardDetailView from "./pages/faculty/DashboardDetailView";
 import AdminRoute from "./routes/AdminRoute";
 import FacultyRoute from "./routes/FacultyRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminReviewQueue from "./pages/admin/AdminReviewQueue";
+import AdminPublications from "./pages/admin/AdminPublications";
+import AdminUserDirectory from "./pages/admin/AdminUserDirectory";
+import AdminEntryDetail from "./pages/admin/AdminEntryDetail";
+import ProfilePage from "./pages/faculty/ProfilePage";
+import SetupProfilePage from "./pages/SetupProfilePage";
 import LoginPage from "./views/LoginPage";
 
 // type AuthMode = "google" | "manual";
@@ -85,6 +95,54 @@ function nowStamp() {
   });
 }
 
+function loadStoredUserProfiles(): AppUser[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  try {
+    const raw = window.localStorage.getItem("rnd_user_profiles");
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.filter(
+      (item): item is AppUser =>
+        item && typeof item.email === "string" && typeof item.name === "string",
+    );
+  } catch {
+    return [];
+  }
+}
+
+function mergeUserProfiles(base: AppUser[], stored: AppUser[]) {
+  const existingEmails = new Set(base.map((user) => user.email.toLowerCase()));
+
+  return [
+    ...base,
+    ...stored.filter((profile) => {
+      return !existingEmails.has(profile.email.toLowerCase());
+    }),
+  ];
+}
+
+function persistStoredProfiles(profiles: AppUser[]) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem("rnd_user_profiles", JSON.stringify(profiles));
+  } catch {
+    // Ignore storage failures.
+  }
+}
+
 function getLoginNotificationTitle(email: string) {
   const storageKey = `rnd_seen_login:${email.toLowerCase()}`;
 
@@ -112,6 +170,9 @@ function App() {
   //   "All",
   // );
   // const [selectedTab, setSelectedTab] = useState<Tab>("dashboard");
+  const [users, setUsers] = useState<AppUser[]>(() =>
+    mergeUserProfiles(directoryUsers, loadStoredUserProfiles()),
+  );
   const [entries, setEntries] = useState<PublicationEntry[]>(sampleEntries);
   const [selectedEntryId, setSelectedEntryId] = useState(sampleEntries[0].id);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -131,6 +192,14 @@ function App() {
   // const [messageText, setMessageText] = useState("");
   // const [directMessageText, setDirectMessageText] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [userName, setUserName] = useState("");
+  const currentUserProfile = useMemo(
+    () =>
+      users.find(
+        (user) => user.email.toLowerCase() === userEmail.toLowerCase(),
+      ),
+    [userEmail, users],
+  );
   const [isAdmin, setIsAdmin] = useState(false);
   const [initializing, setInitializing] = useState(true);
   const [commitMessage, setCommitMessage] = useState("");
@@ -249,6 +318,42 @@ function App() {
   // }, [selectedEntry]);
 
   const unreadCount = notifications.filter((n) => n.unread).length;
+  const userDisplayName = userName || userEmail || "Faculty member";
+  const isKnownProfile = Boolean(userEmail && currentUserProfile);
+
+  const facultyOwnedEntries = useMemo(() => {
+    return entries.filter((entry) => {
+      return (
+        entry.owner === userEmail ||
+        entry.owner === userDisplayName ||
+        entry.contributors.includes(userDisplayName) ||
+        entry.contributors.includes(userEmail)
+      );
+    });
+  }, [entries, userDisplayName, userEmail]);
+
+  const facultyProfile: FacultyProfileSummary = useMemo(() => {
+    const activeEntries = facultyOwnedEntries.filter(
+      (entry) => entry.status !== "published" && entry.status !== "closed",
+    ).length;
+
+    const publishedEntries = facultyOwnedEntries.filter(
+      (entry) =>
+        entry.status === "published" ||
+        entry.status === "approved_for_publication",
+    ).length;
+
+    return {
+      displayName: userDisplayName,
+      email: userEmail,
+      role,
+      department: facultyOwnedEntries[0]?.department ?? "Research Cell",
+      ownedEntries: facultyOwnedEntries,
+      activeEntries,
+      publishedEntries,
+      unreadNotifications: unreadCount,
+    };
+  }, [facultyOwnedEntries, unreadCount, role, userDisplayName, userEmail]);
 
   function selectEntry(entryId: string) {
     setSelectedEntryId(entryId);
@@ -275,17 +380,30 @@ function App() {
 
   const handleSuccessfulLogin = useCallback(
     (user: { email: string; name?: string; role?: string }) => {
+      const normalizedEmail = user.email.toLowerCase();
+      const existingProfile = findDirectoryUser(normalizedEmail, users);
+      const shouldRouteToSetup = !existingProfile;
+
       setAuthenticated(true);
-      setUserEmail(user.email || "");
+      setUserEmail(normalizedEmail);
+      setUserName(user.name || normalizedEmail);
       setRole((user.role as Role) || initialRole);
 
-      const title = getLoginNotificationTitle(user.email);
+      const title = getLoginNotificationTitle(normalizedEmail);
       const detail = user.name
         ? `${user.name} signed in successfully.`
-        : `${user.email} signed in successfully.`;
+        : `${normalizedEmail} signed in successfully.`;
       addEntryNotification(title, detail);
+
+      if (shouldRouteToSetup) {
+        navigate("/setup-profile", { replace: true });
+      } else if (user.role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
     },
-    [addEntryNotification],
+    [addEntryNotification, navigate, users],
   );
 
   // function releaseQueuedNotifications(nextQueue?: NotificationItem[]) {
@@ -383,15 +501,21 @@ function App() {
       })
       .then((data) => {
         if (data.email) {
+          const normalizedEmail = data.email.toLowerCase();
+          const userRole = (data.role as Role) || initialRole;
+          const knownProfile = users.some(
+            (user) => user.email.toLowerCase() === normalizedEmail,
+          );
+
           setAuthenticated(true);
-          setUserEmail(data.email || "");
-          setRole((data.role as Role) || initialRole);
-          // If on root, navigate to dashboard
-          const userRole = data.role || initialRole;
+          setUserEmail(normalizedEmail);
+          setUserName(data.name || normalizedEmail || "");
           setRole(userRole);
 
           if (window.location.pathname === "/") {
-            if (userRole === "admin") {
+            if (!knownProfile) {
+              navigate("/setup-profile", { replace: true });
+            } else if (userRole === "admin") {
               navigate("/admin", { replace: true });
             } else {
               navigate("/dashboard", { replace: true });
@@ -422,6 +546,7 @@ function App() {
       setAuthenticated(false);
       setRole(initialRole);
       setUserEmail("");
+      setUserName("");
       setIsAdmin(false);
     } catch (error) {
       console.error("Logout error:", error);
@@ -448,6 +573,33 @@ function App() {
     } catch (error) {
       console.error("Mock sign in error:", error);
     }
+  }
+
+  function handleSaveProfile(profile: AppUser) {
+    setUsers((current) => {
+      const normalizedEmail = profile.email.toLowerCase();
+      const nextUsers = current.some(
+        (user) => user.email.toLowerCase() === normalizedEmail,
+      )
+        ? current.map((user) =>
+            user.email.toLowerCase() === normalizedEmail ? profile : user,
+          )
+        : [...current, profile];
+
+      const extraProfiles = nextUsers.filter(
+        (user) =>
+          !directoryUsers.some(
+            (reference) =>
+              reference.email.toLowerCase() === user.email.toLowerCase(),
+          ),
+      );
+      persistStoredProfiles(extraProfiles);
+      return nextUsers;
+    });
+
+    setUserName(profile.name);
+    setRole(profile.role);
+    navigate("/dashboard", { replace: true });
   }
 
   async function handleSignIn() {
@@ -826,8 +978,7 @@ function App() {
   if (initializing) {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-surface-50">
-        {/* Your spinner element/animation here */}
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />
         <p className="mt-4 text-sm font-medium text-brand-950">
           Loading application session...
         </p>
@@ -846,8 +997,10 @@ function App() {
             authenticated ? (
               role === "admin" ? (
                 <Navigate to="/admin" replace />
-              ) : (
+              ) : isKnownProfile ? (
                 <Navigate to="/dashboard" replace />
+              ) : (
+                <Navigate to="/setup-profile" replace />
               )
             ) : (
               <LoginPage
@@ -865,6 +1018,29 @@ function App() {
             )
           }
         />
+        <Route
+          path="/setup-profile"
+          element={
+            authenticated ? (
+              isKnownProfile ? (
+                role === "admin" ? (
+                  <Navigate to="/admin" replace />
+                ) : (
+                  <Navigate to="/dashboard" replace />
+                )
+              ) : (
+                <SetupProfilePage
+                  initialName={userName}
+                  initialEmail={userEmail}
+                  initialRole={role}
+                  onSave={handleSaveProfile}
+                />
+              )
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
         {/* Redirect from backend */}
         <Route
           path="/auth-callback"
@@ -876,20 +1052,25 @@ function App() {
         <Route
           element={
             authenticated ? (
-              <FacultyRoute
-                authenticated={authenticated}
-                role={role}
-                handleLogout={handleLogout}
-                unreadCount={unreadCount}
-                notificationsOpen={notificationsOpen}
-                setNotificationsOpen={setNotificationsOpen}
-                toggleNotifications={toggleNotifications}
-                markAllNotificationsRead={markAllNotificationsRead}
-                notifications={notifications}
-                markNotificationRead={markNotificationRead}
-                notificationsRef={notificationsRef}
-                selectedEntryId={selectedEntryId}
-              />
+              isKnownProfile ? (
+                <FacultyRoute
+                  authenticated={authenticated}
+                  role={role}
+                  handleLogout={handleLogout}
+                  unreadCount={unreadCount}
+                  notificationsOpen={notificationsOpen}
+                  setNotificationsOpen={setNotificationsOpen}
+                  toggleNotifications={toggleNotifications}
+                  markAllNotificationsRead={markAllNotificationsRead}
+                  notifications={notifications}
+                  markNotificationRead={markNotificationRead}
+                  notificationsRef={notificationsRef}
+                  selectedEntryId={selectedEntryId}
+                  facultyProfile={facultyProfile}
+                />
+              ) : (
+                <Navigate to="/setup-profile" replace />
+              )
             ) : (
               <Navigate to="/" replace />
             )
@@ -911,36 +1092,46 @@ function App() {
           <Route
             path="/dashboard/create"
             element={
-              <CreateEntryView
-                entryDraft={entryDraft}
-                shortId={shortId}
-                nowStamp={nowStamp}
-                userEmail={userEmail}
-                emptyEntry={emptyEntry}
-                setEntries={setEntries}
-                setSelectedEntryId={setSelectedEntryId}
-                setEntryDraft={setEntryDraft}
-                addEntryNotification={addEntryNotification}
-              />
+              role === "admin" ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <CreateEntryView
+                  entryDraft={entryDraft}
+                  shortId={shortId}
+                  nowStamp={nowStamp}
+                  userEmail={userEmail}
+                  emptyEntry={emptyEntry}
+                  setEntries={setEntries}
+                  setSelectedEntryId={setSelectedEntryId}
+                  setEntryDraft={setEntryDraft}
+                  addEntryNotification={addEntryNotification}
+                  users={users}
+                />
+              )
             }
           />
           <Route
             path="/dashboard/entries/:entryId/edit"
             element={
-              <EditEntryView
-                selectedEntry={selectedEntry}
-                selectedEntryId={selectedEntryId}
-                userEmail={userEmail}
-                commitMessage={commitMessage}
-                shortId={shortId}
-                nowStamp={nowStamp}
-                entryDraft={entryDraft}
-                setEntries={setEntries}
-                setCommitMessage={setCommitMessage}
-                addEntryNotification={addEntryNotification}
-                setEntryDraft={setEntryDraft}
-                setSelectedEntryId={setSelectedEntryId}
-              />
+              role === "admin" ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <EditEntryView
+                  selectedEntry={selectedEntry}
+                  selectedEntryId={selectedEntryId}
+                  userEmail={userEmail}
+                  commitMessage={commitMessage}
+                  shortId={shortId}
+                  nowStamp={nowStamp}
+                  entryDraft={entryDraft}
+                  setEntries={setEntries}
+                  setCommitMessage={setCommitMessage}
+                  addEntryNotification={addEntryNotification}
+                  setEntryDraft={setEntryDraft}
+                  setSelectedEntryId={setSelectedEntryId}
+                  users={users}
+                />
+              )
             }
           />
           <Route
@@ -965,32 +1156,107 @@ function App() {
                 selectedEntryId={selectedEntryId}
                 selectEntry={selectEntry}
                 isAdmin={isAdmin}
+                users={users}
               />
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProfilePage
+                facultyProfile={facultyProfile}
+                users={users}
+                entries={entries}
+                currentUserEmail={userEmail}
+                isAdmin={role === "admin"}
+              />
+            }
+          />
+          <Route
+            path="/profile/edit"
+            element={
+              authenticated && isKnownProfile ? (
+                role === "admin" ? (
+                  <Navigate to="/profile" replace />
+                ) : (
+                  <SetupProfilePage
+                    initialName={currentUserProfile?.name || userName}
+                    initialEmail={currentUserProfile?.email || userEmail}
+                    initialRole={currentUserProfile?.role || role}
+                    initialDepartment={currentUserProfile?.department}
+                    initialTitle={currentUserProfile?.title}
+                    initialOffice={currentUserProfile?.office}
+                    initialExpertise={currentUserProfile?.expertise.join(", ")}
+                    initialBio={currentUserProfile?.bio}
+                    onSave={handleSaveProfile}
+                    isEdit
+                  />
+                )
+              ) : (
+                <Navigate to="/" replace />
+              )
             }
           />
         </Route>
         <Route
           element={
             authenticated ? (
-              <AdminRoute
-                authenticated={authenticated}
-                role={role}
-                handleLogout={handleLogout}
-                unreadCount={unreadCount}
-                notificationsOpen={notificationsOpen}
-                setNotificationsOpen={setNotificationsOpen}
-                toggleNotifications={toggleNotifications}
-                markAllNotificationsRead={markAllNotificationsRead}
-                notifications={notifications}
-                markNotificationRead={markNotificationRead}
-                notificationsRef={notificationsRef}
-              />
+              isKnownProfile ? (
+                <AdminRoute
+                  authenticated={authenticated}
+                  role={role}
+                  handleLogout={handleLogout}
+                  unreadCount={unreadCount}
+                  notificationsOpen={notificationsOpen}
+                  setNotificationsOpen={setNotificationsOpen}
+                  toggleNotifications={toggleNotifications}
+                  markAllNotificationsRead={markAllNotificationsRead}
+                  notifications={notifications}
+                  markNotificationRead={markNotificationRead}
+                  notificationsRef={notificationsRef}
+                />
+              ) : (
+                <Navigate to="/setup-profile" replace />
+              )
             ) : (
               <Navigate to="/" replace />
             )
           }
         >
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route
+            path="/admin"
+            element={<AdminDashboard entries={entries} users={users} />}
+          />
+          <Route
+            path="/admin/review"
+            element={
+              <AdminReviewQueue
+                entries={entries}
+                setEntries={setEntries}
+                userEmail={userEmail}
+                addEntryNotification={addEntryNotification}
+              />
+            }
+          />
+          <Route
+            path="/admin/publications"
+            element={<AdminPublications entries={entries} />}
+          />
+          <Route
+            path="/admin/entries/:entryId"
+            element={
+              <AdminEntryDetail
+                entries={entries}
+                setEntries={setEntries}
+                userEmail={userEmail}
+                addEntryNotification={addEntryNotification}
+              />
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={<AdminUserDirectory users={users} />}
+          />
         </Route>
         <Route
           path="*"
@@ -1046,13 +1312,6 @@ function AuthCallback({
         if (res.ok && data.email) {
           // 3. Commit user data to parent state
           onLoginSuccess(data);
-
-          // 4. Perform localized execution routing instantly
-          if (data.role === "admin") {
-            navigate("/admin", { replace: true });
-          } else {
-            navigate("/dashboard", { replace: true });
-          }
           return;
         }
 

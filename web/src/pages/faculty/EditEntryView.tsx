@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { PublicationEntry } from "@/types";
+import { AppUser, PublicationEntry } from "@/types";
 import { departments } from "../../mockData";
+import UserMultiSelect from "../../components/UserMultiSelect";
 
 interface EditEntryViewProps {
   selectedEntry: PublicationEntry;
@@ -20,6 +21,7 @@ interface EditEntryViewProps {
   ) => void;
   setEntryDraft: (value: React.SetStateAction<PublicationEntry>) => void;
   setSelectedEntryId: (value: React.SetStateAction<string>) => void;
+  users: AppUser[];
 }
 
 const EditEntryView: React.FC<EditEntryViewProps> = ({
@@ -35,6 +37,7 @@ const EditEntryView: React.FC<EditEntryViewProps> = ({
   addEntryNotification,
   setEntryDraft,
   setSelectedEntryId,
+  users,
 }) => {
   const navigate = useNavigate();
   // const location = useLocation();
@@ -385,26 +388,18 @@ const EditEntryView: React.FC<EditEntryViewProps> = ({
                 </label>
 
                 {/* Contributors */}
-                <label className="block">
-                  <span className="text-sm font-medium text-brand-950">
-                    Contributors
-                  </span>
-                  <textarea
-                    value={entryDraft.contributors.join(", ")}
-                    onChange={(e) =>
-                      setEntryDraft((current) => ({
-                        ...current,
-                        contributors: e.target.value
-                          .split(",")
-                          .map((c) => c.trim())
-                          .filter((c) => c.length > 0),
-                      }))
-                    }
-                    rows={2}
-                    className="mt-2 w-full rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-brand-700 focus:ring-2 focus:ring-brand-700/30"
-                    placeholder="prof.amit@college.edu, dr.sharma@college.edu"
-                  />
-                </label>
+                <UserMultiSelect
+                  users={users}
+                  selected={entryDraft.contributors}
+                  onChange={(contributors) =>
+                    setEntryDraft((current) => ({
+                      ...current,
+                      contributors,
+                    }))
+                  }
+                  label="Contributors"
+                  placeholder="Search by name, email, department, or expertise"
+                />
                 {/* Metrics */}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="block">

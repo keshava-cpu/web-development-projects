@@ -10,10 +10,10 @@ export type EntryStatus =
 
 export type MessageScope = "entry" | "direct";
 
-export type TimelineEventKind = 
+export type TimelineEventKind =
   | "Created"
-  | "Edited" 
-  | "StatusChanged" 
+  | "Edited"
+  | "StatusChanged"
   | "ReviewRequested"
   | "ReviewApproved"
   | "ReviewRejected"
@@ -82,4 +82,27 @@ export interface NotificationItem {
   detail: string;
   createdAt: string;
   unread: boolean;
+}
+
+export interface FacultyProfileSummary {
+  displayName: string;
+  email: string;
+  role: Role;
+  department: string;
+  ownedEntries: PublicationEntry[];
+  activeEntries: number;
+  publishedEntries: number;
+  unreadNotifications: number;
+}
+
+export interface AppUser {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  department: string;
+  title: string;
+  office: string;
+  expertise: string[];
+  bio: string;
 }

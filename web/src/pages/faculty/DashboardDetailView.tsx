@@ -1,6 +1,7 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { PublicationEntry, EntryStatus } from "@/types";
+import { useLocation, useNavigate } from "react-router-dom";
+import { AppUser, PublicationEntry, EntryStatus } from "@/types";
+import { getDirectoryUserLabel } from "../../mockData";
 
 interface DashboardDetailViewProps {
   sidebarCollapsed: boolean;
@@ -21,6 +22,7 @@ interface DashboardDetailViewProps {
   selectedEntryId: string;
   selectEntry: (entryId: string) => void;
   isAdmin: boolean;
+  users: AppUser[];
 }
 
 const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
@@ -42,17 +44,27 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
   selectedEntryId,
   selectEntry,
   isAdmin,
+  users,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnToAdmin = (location.state as { returnTo?: string } | null)
+    ?.returnTo;
+
+  const openProfile = (identifier: string) => {
+    navigate(
+      `/profile?search=${encodeURIComponent(identifier)}&view=${encodeURIComponent(identifier)}&section=directory`,
+    );
+  };
 
   return (
     <div className="w-full min-h-screen flex bg-surface-50">
       <div className="w-full flex flex-1">
         <aside
-          className={`bg-white h-screen shadow-sm sticky top-0 transition-all duration-300 ${
+          className={`sticky top-[108px] z-20 bg-white h-[calc(100vh-108px)] shadow-sm transition-all duration-300 ${
             sidebarCollapsed ? "w-16" : "w-80"
           } flex flex-col flex-shrink-0`}
-          style={{ height: "100vh" }}
+          style={{ height: "calc(100vh - 108px)" }}
         >
           <div className="flex items-center justify-between border-b border-surface-200 bg-gradient-to-r from-brand-950 to-brand-900 px-4 py-4 text-white">
             <div className={`${sidebarCollapsed ? "hidden" : "block"}`}>
@@ -198,9 +210,33 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
 
         {/* Main Content */}
         <div className="flex-1 p-4">
-          <section className="mx-auto max-w-5xl">
+          <section className="mx-auto max-w-5xl relative">
+            {returnToAdmin && isAdmin && (
+              <button
+                type="button"
+                onClick={() => navigate(returnToAdmin)}
+                aria-label="Return to admin view"
+                title="Return to admin view"
+                className="fixed right-6 top-6 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-brand-950 text-white shadow-2xl transition hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-400"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+            )}
             <div className="mx-auto max-w-7xl px-6 py-6">
-              <div className="mb-4 flex items-center justify-between gap-4">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.25em] text-muted">
                     Dashboard
@@ -209,12 +245,14 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                     Entry details
                   </h2>
                 </div>
-                <button
-                  className="rounded-full border border-surface-200 bg-white px-4 py-2 text-sm font-semibold text-brand-900 shadow-sm transition hover:border-brand-300 hover:bg-surface-50"
-                  onClick={() => navigate("/dashboard")}
-                >
-                  Back to list
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    className="rounded-full border border-surface-200 bg-white px-4 py-2 text-sm font-semibold text-brand-900 shadow-sm transition hover:border-brand-300 hover:bg-surface-50"
+                    onClick={() => navigate("/dashboard")}
+                  >
+                    Back to list
+                  </button>
+                </div>
               </div>
 
               <article className="rounded-[1.75rem] border border-surface-200 bg-white p-6 shadow-soft">
@@ -232,20 +270,21 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                   </div>
                   <div className="flex flex-col items-end gap-3">
                     <div className="flex items-center gap-3">
-                      {(selectedEntry?.owner === userEmail ||
-                        (selectedEntry?.contributors?.includes(userEmail) ??
-                          false)) && (
-                        <button
-                          onClick={() =>
-                            navigate(
-                              `/dashboard/entries/${selectedEntryId}/edit`,
-                            )
-                          }
-                          className="rounded-lg border border-surface-200 bg-surface-50 px-4 py-2 text-sm font-semibold text-brand-900 transition hover:bg-surface-100"
-                        >
-                          ✏️ Edit
-                        </button>
-                      )}
+                      {!isAdmin &&
+                        (selectedEntry?.owner === userEmail ||
+                          (selectedEntry?.contributors?.includes(userEmail) ??
+                            false)) && (
+                          <button
+                            onClick={() =>
+                              navigate(
+                                `/dashboard/entries/${selectedEntryId}/edit`,
+                              )
+                            }
+                            className="rounded-lg border border-surface-200 bg-surface-50 px-4 py-2 text-sm font-semibold text-brand-900 transition hover:bg-surface-100"
+                          >
+                            ✏️ Edit
+                          </button>
+                        )}
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClasses[selectedEntry?.status ?? "draft"]}`}
                       >
@@ -494,7 +533,7 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
+                <div className="mt-6 grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
                   <section className="space-y-6">
                     <div className="rounded-2xl border border-surface-200 bg-surface-50 p-5">
                       <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted">
@@ -510,66 +549,72 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                       <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted">
                         Activity Timeline
                       </h4>
-                      <div className="mt-4 space-y-3">
+                      <div className="relative mt-4 pl-2">
+                        <div className="pointer-events-none absolute left-[0.9rem] top-1 bottom-1 w-px bg-surface-200" />
                         {(selectedEntry?.timeline ?? []).length === 0 && (
                           <p className="text-sm text-muted">No activity yet.</p>
                         )}
-                        {(selectedEntry?.timeline ?? []).map((item) => (
-                          <div
-                            key={item.id}
-                            className="flex relative gap-3 border-l-2 border-brand-200 pb-4 pl-4 last:border-l-transparent"
-                          >
-                            <div>
-                              <div className="absolute -ml-6 -mt-1 h-3 w-3 rounded-full bg-brand-600" />
-                              <div className="flex flex-wrap items-center gap-2 text-sm">
-                                <span className="font-semibold text-brand-950">
-                                  {item.kind === "Edited" && "📝"}
-                                  {item.kind === "Created" && "✨"}
-                                  {item.kind === "ReviewRequested" && "📋"}
-                                  {item.kind === "ReviewApproved" && "✅"}
-                                  {item.kind === "ReviewRejected" && "❌"}
-                                  {item.kind === "Merged" && "🔀"}
-                                  {item.kind === "StatusChanged" && "🔄"}
-                                  {item.kind === "CommentAdded" && "💬"}
-                                  {item.kind === "Closed" && "🔒"}
-                                  {item.kind === "Reopened" && "🔓"} {item.kind}
-                                </span>
-                                <span className="text-muted">
-                                  by {item.actor}
-                                </span>
-                                <span className="text-xs text-muted">
-                                  {item.at}
-                                </span>
+                        <div className="mt-3 space-y-2">
+                          {(selectedEntry?.timeline ?? []).map((item) => (
+                            <div
+                              key={item.id}
+                              className="grid grid-cols-[4.25rem_1.5rem_minmax(0,1fr)] items-start gap-3 py-2"
+                            >
+                              <div className="pt-1 text-right text-[11px] font-medium uppercase tracking-[0.2em] text-muted">
+                                {item.at}
                               </div>
-                              <p className="mt-2 text-sm text-brand-950">
-                                {item.note}
-                              </p>
-                              {item.details?.commitHash && (
-                                <div className="mt-2 flex items-center gap-2">
-                                  <code className="inline-block rounded bg-surface-100 px-2 py-1 text-xs font-mono text-brand-700">
-                                    {item.details.commitHash.slice(0, 7)}
-                                  </code>
+                              <div className="relative flex items-start justify-center">
+                                <span className="mt-1.5 h-4 w-4 rounded-full border-[3px] border-white bg-brand-600 shadow ring-4 ring-brand-600/10" />
+                              </div>
+                              <div className="rounded-2xl border border-surface-200 bg-surface-50 p-4 shadow-sm transition hover:border-brand-200 hover:bg-white">
+                                <div className="flex flex-wrap items-center gap-2 text-sm">
+                                  <span className="font-semibold text-brand-950">
+                                    {item.kind === "Edited" && "📝"}
+                                    {item.kind === "Created" && "✨"}
+                                    {item.kind === "ReviewRequested" && "📋"}
+                                    {item.kind === "ReviewApproved" && "✅"}
+                                    {item.kind === "ReviewRejected" && "❌"}
+                                    {item.kind === "Merged" && "🔀"}
+                                    {item.kind === "StatusChanged" && "🔄"}
+                                    {item.kind === "CommentAdded" && "💬"}
+                                    {item.kind === "Closed" && "🔒"}
+                                    {item.kind === "Reopened" && "🔓"}{" "}
+                                    {item.kind}
+                                  </span>
+                                  <span className="text-muted">
+                                    by {item.actor}
+                                  </span>
                                 </div>
-                              )}
-                              {item.details?.fromStatus &&
-                                item.details?.toStatus && (
-                                  <div className="mt-2 text-xs text-muted">
-                                    {
-                                      statusLabels[
-                                        item.details.fromStatus as EntryStatus
-                                      ]
-                                    }{" "}
-                                    →{" "}
-                                    {
-                                      statusLabels[
-                                        item.details.toStatus as EntryStatus
-                                      ]
-                                    }
+                                <p className="mt-2 text-sm leading-6 text-brand-950">
+                                  {item.note}
+                                </p>
+                                {item.details?.commitHash && (
+                                  <div className="mt-3 flex items-center gap-2">
+                                    <code className="inline-block rounded bg-white px-2 py-1 text-xs font-mono text-brand-700 ring-1 ring-surface-200">
+                                      {item.details.commitHash.slice(0, 7)}
+                                    </code>
                                   </div>
                                 )}
+                                {item.details?.fromStatus &&
+                                  item.details?.toStatus && (
+                                    <div className="mt-3 inline-flex rounded-full bg-white px-2.5 py-1 text-xs font-medium text-muted ring-1 ring-surface-200">
+                                      {
+                                        statusLabels[
+                                          item.details.fromStatus as EntryStatus
+                                        ]
+                                      }{" "}
+                                      →{" "}
+                                      {
+                                        statusLabels[
+                                          item.details.toStatus as EntryStatus
+                                        ]
+                                      }
+                                    </div>
+                                  )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     </div>
 
@@ -627,95 +672,63 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                   </section>
 
                   <aside className="space-y-6">
-                    <div className="rounded-2xl border border-surface-200 bg-surface-50 p-5">
-                      <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted">
-                        PDF Preview
-                      </h4>
-                      <div className="mt-4 flex min-h-[260px] items-center justify-center rounded-2xl border border-dashed border-surface-300 bg-white p-6 text-center">
-                        <div>
-                          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-600/10 text-brand-700">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-8 w-8"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M7 7h10M7 11h10M7 15h7m-7 5h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z"
-                              />
-                            </svg>
-                          </div>
-                          <p className="mt-4 text-sm font-semibold text-brand-950">
-                            PDF placeholder
-                          </p>
-                          <p className="mt-2 text-xs text-muted">
-                            Preview or attach the publication PDF here later.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
                     <div className="rounded-2xl border border-surface-200 bg-white p-5">
                       <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted">
                         Collaborators
                       </h4>
                       <div className="mt-4 space-y-2">
-                        <div className="flex items-center gap-3 rounded-lg bg-surface-50 p-3">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openProfile(selectedEntry?.owner ?? "")
+                          }
+                          className="flex w-full items-center gap-3 rounded-lg bg-surface-50 p-3 text-left transition hover:bg-surface-100"
+                        >
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-200 text-xs font-bold text-brand-700">
-                            {selectedEntry?.owner?.charAt(0).toUpperCase()}
+                            {getDirectoryUserLabel(
+                              selectedEntry?.owner ?? "",
+                              users,
+                            )
+                              .charAt(0)
+                              .toUpperCase()}
                           </div>
                           <div className="flex-1 text-sm">
                             <p className="font-medium text-brand-950">
-                              {selectedEntry?.owner}
+                              {getDirectoryUserLabel(
+                                selectedEntry?.owner ?? "",
+                                users,
+                              )}
                             </p>
-                            <p className="text-xs text-muted">Owner</p>
+                            <p className="text-xs text-muted">
+                              Owner · click to open profile
+                            </p>
                           </div>
-                        </div>
+                        </button>
                         {(selectedEntry?.contributors ?? []).map(
                           (contributor) => (
-                            <div
+                            <button
                               key={contributor}
-                              className="flex items-center gap-3 rounded-lg border border-surface-200 p-3"
+                              type="button"
+                              onClick={() => openProfile(contributor)}
+                              className="flex w-full items-center gap-3 rounded-lg border border-surface-200 p-3 text-left transition hover:border-brand-200 hover:bg-brand-50"
                             >
                               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-600">
-                                {contributor?.charAt(0).toUpperCase()}
+                                {getDirectoryUserLabel(contributor, users)
+                                  .charAt(0)
+                                  .toUpperCase()}
                               </div>
                               <div className="flex-1 text-sm">
                                 <p className="font-medium text-brand-950">
-                                  {contributor}
+                                  {getDirectoryUserLabel(contributor, users)}
                                 </p>
                                 <p className="text-xs text-muted">
-                                  Contributor
+                                  Contributor · click to open profile
                                 </p>
                               </div>
-                            </div>
+                            </button>
                           ),
                         )}
                       </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-surface-200 bg-white p-5">
-                      <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted">
-                        Metrics
-                      </h4>
-                      <dl className="mt-4 space-y-3 text-sm">
-                        <div className="flex items-center justify-between gap-4 border-b border-surface-100 pb-2">
-                          <dt className="text-muted">💬 Messages</dt>
-                          <dd className="font-semibold text-brand-950">
-                            {selectedEntry?.metrics.messageCount ?? 0}
-                          </dd>
-                        </div>
-                        <div className="flex items-center justify-between gap-4">
-                          <dt className="text-muted">⭐ Impact</dt>
-                          <dd className="font-semibold text-brand-950">
-                            {selectedEntry?.metrics.impactPoints ?? 0}
-                          </dd>
-                        </div>
-                      </dl>
                     </div>
                   </aside>
                 </div>

@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, NavLink, Outlet } from "react-router-dom";
 import { NotificationItem } from "@/types";
 
 interface AdminRouteProps {
@@ -152,6 +152,31 @@ export default function AdminRoute({
           </div>
         </div>
       </header>
+
+      <nav className="border-b border-surface-200 bg-brand-950/95 text-white">
+        <div className="mx-auto flex max-w-7xl flex-wrap gap-3 px-6 py-3">
+          {[
+            { to: "/admin", label: "Dashboard" },
+            { to: "/admin/review", label: "Review queue" },
+            { to: "/admin/publications", label: "Publications" },
+            { to: "/admin/users", label: "User directory" },
+          ].map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  isActive
+                    ? "bg-white text-brand-950"
+                    : "bg-white/10 text-white/80 hover:bg-white/20"
+                }`
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </div>
+      </nav>
 
       {/* 🔴 ADMIN CHILD OUTPUT CANVAS */}
       <div className="mx-auto max-w-7xl p-6">
