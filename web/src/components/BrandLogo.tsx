@@ -7,6 +7,15 @@ interface BrandLogoProps {
   iconClassName?: string;
 }
 
+interface BrandLogoProps {
+  title?: string;
+  subtitle?: string;
+  compact?: boolean;
+  className?: string;
+  textClassName?: string;
+  iconClassName?: string;
+}
+
 export default function BrandLogo({
   title = "College R&D",
   subtitle = "Research & Publications",
@@ -16,43 +25,49 @@ export default function BrandLogo({
   iconClassName = "",
 }: BrandLogoProps) {
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className={`flex items-center gap-4 ${className}`}>
+      {/* Increased container size from h-8 w-8 to h-16 w-16 for better visibility */}
       <div
-        className={`flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-white shadow-sm ring-1 ring-white/15 ${iconClassName}`}
+        className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-md ring-1 ring-white/15 ${iconClassName}`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 64 64"
-          className="h-4 w-4"
+          className="h-10 w-10" /* Scaled icon shape from h-4 w-4 to h-10 w-10 */
           fill="none"
         >
-          <rect
-            x="8"
-            y="8"
-            width="48"
-            height="48"
-            rx="16"
-            fill="currentColor"
+          {/* Elegant geometric R & D path layout */}
+          <path
+            d="M16 46V18h12c5 0 9 3 9 7.5S33 33 28 33h-12"
+            stroke="currentColor"
+            strokeWidth="4.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
           <path
-            d="M22 20h10c7 0 12 4 12 11 0 7-5 11-12 11H22z"
-            fill="#0f172a"
-          />
-          <path
-            d="M24 22v20"
-            stroke="white"
-            strokeWidth="3"
+            d="M25 33l11 13"
+            stroke="currentColor"
+            strokeWidth="4.5"
             strokeLinecap="round"
           />
-          <path d="M31 22h7c3 0 5 2 5 5 0 3-2 5-5 5h-7z" fill="white" />
+          <path
+            d="M38 18v28c8 0 13-5 13-14s-5-14-13-14z"
+            stroke="#38bdf8"
+            strokeWidth="4.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </div>
+
       {!compact && (
         <div className={textClassName}>
-          <p className="text-[10px] uppercase tracking-[0.32em] text-white/60">
+          <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-white/60">
             {subtitle}
           </p>
-          <h1 className="text-base font-semibold leading-tight">{title}</h1>
+          <h1 className="text-xl font-bold leading-tight text-white">
+            {title}
+          </h1>
         </div>
       )}
     </div>

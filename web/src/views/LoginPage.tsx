@@ -40,11 +40,11 @@ export default function LoginPage({
     <main className="min-h-screen bg-surface-200 flex items-center justify-center">
       <div className="w-full max-w-sm p-8 text-center rounded-[1.75rem] border border-surface-200 bg-white shadow-soft">
         <div className="relative flex items-center justify-center">
-          <div className="mb-2 flex items-center gap-3 rounded-2xl bg-brand-50 px-3 py-2">
+          <div className="mb-3 flex items-center justify-center rounded-3xl bg-brand-50 px-5 py-4 shadow-sm">
             <BrandLogo
               compact
               className=""
-              iconClassName="h-11 w-11 bg-brand-950 text-brand-50"
+              iconClassName="h-14 w-14 bg-brand-950 text-brand-50"
               textClassName=""
             />
           </div>
