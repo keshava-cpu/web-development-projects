@@ -339,17 +339,30 @@ const FacultyRoute: React.FC<FacultyRouteProps> = ({
         </header>
 
         <div className="border-b border-surface-200 bg-white/95 backdrop-blur">
-          <div className="mx-auto flex max-w-full items-center gap-2 overflow-x-auto px-4 py-2">
-            <button
-              onClick={() => navigate("/dashboard")}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition whitespace-nowrap ${
-                isListPage
-                  ? "bg-brand-950 text-white"
-                  : "bg-surface-100 text-brand-950 hover:bg-surface-200"
-              }`}
-            >
-              Dashboard
-            </button>
+          <div className="mx-auto flex max-w-full items-center justify-between gap-2 overflow-x-auto px-4 py-2">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate("/dashboard")}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition whitespace-nowrap ${
+                  isListPage
+                    ? "bg-brand-950 text-white"
+                    : "bg-surface-100 text-brand-950 hover:bg-surface-200"
+                }`}
+              >
+                Dashboard
+              </button>
+
+              <button
+                onClick={handleDetailViewClick}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition whitespace-nowrap ${
+                  isDetailPage
+                    ? "bg-brand-950 text-white"
+                    : "bg-surface-100 text-brand-950 hover:bg-surface-200"
+                }`}
+              >
+                Detail View
+              </button>
+            </div>
 
             <button
               onClick={() => navigate("/dashboard/create")}
@@ -360,17 +373,6 @@ const FacultyRoute: React.FC<FacultyRouteProps> = ({
               }`}
             >
               Create Entry
-            </button>
-
-            <button
-              onClick={handleDetailViewClick}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition whitespace-nowrap ${
-                isDetailPage
-                  ? "bg-brand-950 text-white"
-                  : "bg-surface-100 text-brand-950 hover:bg-surface-200"
-              }`}
-            >
-              Detail View
             </button>
           </div>
         </div>
