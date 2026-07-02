@@ -58,13 +58,39 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
   };
 
   return (
-    <div className="w-full min-h-screen flex bg-surface-50">
-      <div className="w-full flex flex-1">
+    <div className="flex min-h-screen w-full flex-col bg-surface-50 lg:flex-row">
+      <div className="flex w-full flex-1 flex-col lg:flex-row">
+        {sidebarCollapsed && (
+          <div className="border-b border-surface-200 bg-white px-3 py-3 lg:hidden">
+            <button
+              type="button"
+              onClick={() => setSidebarCollapsed(false)}
+              className="flex w-full items-center justify-between rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 text-left text-sm font-semibold text-brand-950 shadow-sm transition hover:bg-white"
+            >
+              <span>Open entry rail</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+
         <aside
-          className={`sticky top-[108px] z-20 bg-white h-[calc(100vh-108px)] shadow-sm transition-all duration-300 ${
-            sidebarCollapsed ? "w-16" : "w-80"
-          } flex flex-col flex-shrink-0`}
-          style={{ height: "calc(100vh - 108px)" }}
+          className={`z-20 bg-white shadow-sm transition-all duration-300 lg:sticky lg:top-[108px] lg:h-[calc(100vh-108px)] ${
+            sidebarCollapsed ? "hidden lg:flex lg:w-16" : "flex w-full lg:w-80"
+          } flex-col flex-shrink-0`}
+          style={{ height: sidebarCollapsed ? "auto" : undefined }}
         >
           <div className="flex items-center justify-between border-b border-surface-200 bg-gradient-to-r from-brand-950 to-brand-900 px-4 py-4 text-white">
             <div className={`${sidebarCollapsed ? "hidden" : "block"}`}>
@@ -209,7 +235,7 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
         {/* Sidebar */}
 
         {/* Main Content */}
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-3 sm:p-4">
           <section className="mx-auto max-w-5xl relative">
             {returnToAdmin && isAdmin && (
               <button
@@ -217,7 +243,7 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                 onClick={() => navigate(returnToAdmin)}
                 aria-label="Return to admin view"
                 title="Return to admin view"
-                className="fixed right-6 top-6 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-brand-950 text-white shadow-2xl transition hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                className="fixed right-3 top-3 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full bg-brand-950 text-white shadow-2xl transition hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-400 sm:right-6 sm:top-6 sm:h-12 sm:w-12"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -235,7 +261,7 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                 </svg>
               </button>
             )}
-            <div className="mx-auto max-w-7xl px-6 py-6">
+            <div className="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-6">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.25em] text-muted">
@@ -255,7 +281,7 @@ const DashboardDetailView: React.FC<DashboardDetailViewProps> = ({
                 </div>
               </div>
 
-              <article className="rounded-[1.75rem] border border-surface-200 bg-white p-6 shadow-soft">
+              <article className="rounded-[1.75rem] border border-surface-200 bg-white p-4 shadow-soft sm:p-6">
                 <div className="flex flex-wrap items-start justify-between gap-4 border-b border-surface-200 pb-4">
                   <div>
                     <p className="text-xs uppercase tracking-[0.25em] text-muted">

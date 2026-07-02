@@ -50,10 +50,10 @@ const EditEntryView: React.FC<EditEntryViewProps> = ({
     <div className="w-full flex-1 flex flex-col bg-surface-50 overflow-y-auto">
       {/* 🟢 LAYER 1: CLEAN STANDALONE EDIT CONTEXT TOOLBAR BAR */}
       <nav className="border-b border-surface-200 bg-white shadow-sm sticky top-0 z-10">
-        <div className="mx-auto max-w-full px-6 py-4">
+        <div className="mx-auto max-w-full px-4 py-4 sm:px-6">
           {" "}
           {/* Changed max-w-7xl to max-w-full to fill width */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate("/dashboard")}
@@ -185,7 +185,7 @@ const EditEntryView: React.FC<EditEntryViewProps> = ({
                 );
               }
             }}
-            className="mx-auto w-full max-w-7xl px-6 py-6"
+            className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6"
           >
             {/* Changes Section */}
             <div className="mb-6 space-y-6">

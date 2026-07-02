@@ -111,7 +111,7 @@ const FacultyRoute: React.FC<FacultyRouteProps> = ({
     <main className="min-h-screen bg-surface-50 flex flex-col">
       <div className="sticky top-0 z-50">
         <header className="border-b border-surface-200 bg-brand-950 text-white shadow-sm">
-          <div className="mx-auto flex max-w-full items-center justify-between gap-4 px-5 py-3">
+          <div className="mx-auto flex max-w-full flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <button
               onClick={() => navigate("/dashboard")}
               className="text-left transition hover:opacity-90"
@@ -125,12 +125,12 @@ const FacultyRoute: React.FC<FacultyRouteProps> = ({
                 </h1>
               </div>
             </button>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {showAdminReturnButton && (
                 <button
                   type="button"
                   onClick={() => navigate(adminReturnPath)}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/15 sm:w-auto"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -180,9 +180,9 @@ const FacultyRoute: React.FC<FacultyRouteProps> = ({
                     id="notifications-panel"
                     role="dialog"
                     aria-label="Notifications"
-                    className="absolute right-0 z-50 mt-2 w-80 rounded-lg bg-white text-black shadow-lg"
+                    className="fixed left-2 right-2 top-16 z-[60] max-h-[70vh] overflow-auto rounded-2xl bg-white text-black shadow-2xl animate-[fadeIn_180ms_ease-out] sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 sm:max-w-[22rem] sm:translate-x-0"
                   >
-                    <div className="flex items-center justify-between border-b p-3">
+                    <div className="flex flex-col gap-2 border-b p-3 sm:flex-row sm:items-center sm:justify-between">
                       <strong>Notifications</strong>
                       <div className="flex items-center gap-2">
                         <button
@@ -208,7 +208,7 @@ const FacultyRoute: React.FC<FacultyRouteProps> = ({
                       {notifications.map((n) => (
                         <li
                           key={n.id}
-                          className={`flex items-start gap-2 p-2 ${n.unread ? "bg-surface-50" : ""}`}
+                          className={`flex items-start gap-2 rounded-xl p-2 transition-all duration-200 ease-out sm:hover:-translate-y-0.5 sm:hover:bg-surface-100 ${n.unread ? "bg-surface-50" : ""}`}
                         >
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
@@ -250,7 +250,7 @@ const FacultyRoute: React.FC<FacultyRouteProps> = ({
                 </button>
 
                 {profileMenuOpen && (
-                  <div className="absolute right-0 z-50 mt-3 w-64 rounded-2xl border border-surface-200 bg-white p-2 text-slate-900 shadow-2xl">
+                  <div className="fixed left-2 right-2 top-16 z-[60] rounded-2xl border border-surface-200 bg-white p-2 text-slate-900 shadow-2xl sm:absolute sm:left-auto sm:right-0 sm:mt-3 sm:w-64 sm:max-w-[calc(100vw-1rem)]">
                     <div className="border-b border-surface-200 px-3 py-3">
                       <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted">
                         Account

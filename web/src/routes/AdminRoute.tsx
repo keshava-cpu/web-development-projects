@@ -43,14 +43,14 @@ export default function AdminRoute({
     <main className="min-h-screen bg-surface-50">
       {/* 🟢 ADMIN NAV: REUSES YOUR EXACT GLOBAL DARK BAR WITH LOGOUT & NOTIFICATIONS */}
       <header className="border-b border-surface-200 bg-brand-950 text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-white/60">
               College R&D
             </p>
             <h1 className="text-lg font-semibold">Admin Panel</h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {/* Notifications Panel Trigger */}
             <div className="relative" ref={notificationsRef}>
               <button
@@ -85,9 +85,9 @@ export default function AdminRoute({
                   id="notifications-panel"
                   role="dialog"
                   aria-label="Notifications"
-                  className="absolute right-0 z-50 mt-2 w-80 rounded-lg bg-white text-black shadow-lg"
+                  className="fixed left-2 right-2 top-16 z-[60] max-h-[70vh] overflow-auto rounded-2xl bg-white text-black shadow-2xl animate-[fadeIn_180ms_ease-out] sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 sm:max-w-[22rem] sm:translate-x-0"
                 >
-                  <div className="flex items-center justify-between border-b p-3">
+                  <div className="flex flex-col gap-2 border-b p-3 sm:flex-row sm:items-center sm:justify-between">
                     <strong>Notifications</strong>
                     <div className="flex items-center gap-2">
                       <button
@@ -113,7 +113,7 @@ export default function AdminRoute({
                     {notifications.map((n) => (
                       <li
                         key={n.id}
-                        className={`flex items-start gap-2 p-2 ${n.unread ? "bg-surface-50" : ""}`}
+                        className={`flex items-start gap-2 rounded-xl p-2 transition-all duration-200 ease-out sm:hover:-translate-y-0.5 sm:hover:bg-surface-100 ${n.unread ? "bg-surface-50" : ""}`}
                       >
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
@@ -153,7 +153,7 @@ export default function AdminRoute({
       </header>
 
       <nav className="border-b border-surface-200 bg-brand-950/95 text-white">
-        <div className="mx-auto flex max-w-7xl flex-wrap gap-3 px-6 py-3">
+        <div className="mx-auto flex max-w-7xl flex-wrap gap-2 px-4 py-3 sm:px-6">
           {[
             { to: "/admin", label: "Dashboard" },
             { to: "/admin/review", label: "Review queue" },
@@ -178,7 +178,7 @@ export default function AdminRoute({
       </nav>
 
       {/* 🔴 ADMIN CHILD OUTPUT CANVAS */}
-      <div className="mx-auto max-w-7xl p-6">
+      <div className="mx-auto max-w-7xl p-4 sm:p-6">
         <Outlet />
       </div>
     </main>

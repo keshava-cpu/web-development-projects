@@ -25,9 +25,9 @@ export default function AdminDashboard({
   ).length;
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-6">
-      <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-10 shadow-soft">
+    <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6">
+      <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-soft sm:p-10">
           <p className="text-sm uppercase tracking-[0.3em] text-slate-500">
             Admin workspace
           </p>
@@ -104,7 +104,7 @@ export default function AdminDashboard({
           </div>
         </div>
 
-        <div className="rounded-[2rem] border border-slate-200 bg-brand-950 p-10 text-white shadow-soft">
+        <div className="rounded-[2rem] border border-slate-200 bg-brand-950 p-6 text-white shadow-soft sm:p-10">
           <p className="text-xs uppercase tracking-[0.3em] text-slate-300">
             Admin capabilities
           </p>

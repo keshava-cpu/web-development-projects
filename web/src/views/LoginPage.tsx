@@ -37,8 +37,8 @@ export default function LoginPage({
   };
 
   return (
-    <main className="min-h-screen bg-surface-200 flex items-center justify-center">
-      <div className="w-full max-w-sm p-8 text-center rounded-[1.75rem] border border-surface-200 bg-white shadow-soft">
+    <main className="flex min-h-screen items-center justify-center bg-surface-200 px-4 py-6 sm:px-6">
+      <div className="w-full max-w-sm rounded-[1.75rem] border border-surface-200 bg-white p-6 text-center shadow-soft sm:p-8">
         <div className="relative flex items-center justify-center">
           <div className="mb-3 flex items-center justify-center rounded-3xl bg-brand-50 px-5 py-4 shadow-sm">
             <BrandLogo
@@ -84,9 +84,9 @@ export default function LoginPage({
                   id="notifications-panel"
                   role="dialog"
                   aria-label="Notifications"
-                  className="absolute right-0 z-50 mt-2 w-80 rounded-lg bg-white text-black shadow-lg"
+                  className="absolute left-1/2 z-50 mt-2 w-[calc(100vw-1.5rem)] max-w-[22rem] -translate-x-1/2 rounded-2xl bg-white text-black shadow-2xl animate-[fadeIn_180ms_ease-out] sm:left-auto sm:right-0 sm:w-80 sm:translate-x-0"
                 >
-                  <div className="flex items-center justify-between border-b p-3">
+                  <div className="flex flex-col gap-2 border-b p-3 sm:flex-row sm:items-center sm:justify-between">
                     <strong>Notifications</strong>
                     <div className="flex items-center gap-2">
                       <button
@@ -112,7 +112,7 @@ export default function LoginPage({
                     {notifications.map((n) => (
                       <li
                         key={n.id}
-                        className={`flex items-start gap-2 p-2 ${n.unread ? "bg-surface-50" : ""}`}
+                        className={`flex items-start gap-2 rounded-xl p-2 transition-all duration-200 ease-out sm:hover:-translate-y-0.5 sm:hover:bg-surface-100 ${n.unread ? "bg-surface-50" : ""}`}
                       >
                         <div className="flex-1">
                           <div className="flex items-center justify-between">

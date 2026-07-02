@@ -221,7 +221,7 @@ export default function ProfilePage({
               {!isAdmin && currentUserEmail === facultyProfile.email && (
                 <button
                   onClick={() => navigate("/profile/edit")}
-                  className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-brand-950 transition hover:bg-white/15"
+                  className="rounded-full border border-brand-600 bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700"
                 >
                   Edit profile
                 </button>
@@ -342,7 +342,7 @@ export default function ProfilePage({
                   {currentUserEmail === facultyProfile.email && (
                     <button
                       onClick={() => navigate("/profile/edit")}
-                      className="w-full rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-brand-950 transition hover:bg-brand-50"
+                      className="w-full rounded-2xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700"
                     >
                       Edit profile
                     </button>

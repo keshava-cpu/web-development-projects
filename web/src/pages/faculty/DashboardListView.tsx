@@ -22,9 +22,9 @@ const DashboardListView: React.FC<DashboardListViewProps> = ({
   return (
     <div className="w-full flex-1 flex overflow-hidden bg-surface-50">
       {/* Content */}
-      <section className="mx-auto w-full max-w-7xl flex-1 px-6 py-6">
-        <div className="rounded-[1.75rem] border border-surface-200 bg-white/95 p-6 shadow-soft backdrop-blur-sm">
-          <div className="flex flex-wrap items-end justify-between gap-4 border-b border-surface-200 pb-5">
+      <section className="mx-auto w-full max-w-7xl flex-1 px-4 py-4 sm:px-6 sm:py-6">
+        <div className="rounded-[1.75rem] border border-surface-200 bg-white/95 p-4 shadow-soft backdrop-blur-sm sm:p-6">
+          <div className="flex flex-col gap-4 border-b border-surface-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.25em] text-muted select-none">
                 All entries
@@ -36,7 +36,7 @@ const DashboardListView: React.FC<DashboardListViewProps> = ({
                 Select an entry to open the detailed dashboard.
               </p>
             </div>
-            <label className="block w-full max-w-sm">
+            <label className="block w-full sm:max-w-sm">
               <span className="text-xs uppercase tracking-[0.2em] text-muted">
                 Search entries
               </span>
@@ -70,9 +70,9 @@ const DashboardListView: React.FC<DashboardListViewProps> = ({
               <button
                 key={entry.id}
                 onClick={() => selectEntry(entry.id)}
-                className="group w-full min-w-0 rounded-2xl border border-surface-200 bg-surface-50 p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-300 hover:bg-white hover:shadow-md"
+                className="group w-full min-w-0 rounded-2xl border border-surface-200 bg-surface-50 p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-300 hover:bg-white hover:shadow-md sm:p-4"
               >
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-3 sm:gap-4">
                   <div className="mt-1 h-11 w-1.5 shrink-0 rounded-full bg-brand-700/20 transition group-hover:bg-brand-700" />
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-start justify-between gap-3">
