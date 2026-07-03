@@ -188,21 +188,13 @@ function App() {
   useEffect(() => {
     /* eslint-disable @eslint-react/exhaustive-deps */
     if (window.location.pathname !== "/auth-callback") checkAuthStatus();
-    else {
-      const timeoutId = setTimeout(() => {
-        setInitializing(false);
-      }, 0);
-      console.log("initializing:", initializing);
-      return () => clearTimeout(timeoutId);
-    }
   }, []);
-  // useEffect(() => {
-  //   const timeoutId = setTimeout(() => {
-  //     setInitializing(false);
-  //   }, 0);
-  //   console.log("initializing:", initializing);
-  //   return () => clearTimeout(timeoutId);
-  // }, []);
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setInitializing(false);
+    }, 0);
+    return () => clearTimeout(timeoutId);
+  }, []);
   useEffect(() => {
     if (authenticated) {
       const controller = new AbortController();
