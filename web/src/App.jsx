@@ -192,7 +192,6 @@ function App() {
       const timeoutId = setTimeout(() => {
         setInitializing(false);
       }, 0);
-      console.log("initializing:", initializing);
       return () => clearTimeout(timeoutId);
     }
   }, []);
