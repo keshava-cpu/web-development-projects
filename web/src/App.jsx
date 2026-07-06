@@ -188,12 +188,12 @@ function App() {
   useEffect(() => {
     /* eslint-disable @eslint-react/exhaustive-deps */
     if (window.location.pathname !== "/auth-callback") checkAuthStatus();
-  }, []);
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setInitializing(false);
-    }, 0);
-    return () => clearTimeout(timeoutId);
+    else {
+      const timeoutId = setTimeout(() => {
+        setInitializing(false);
+      }, 0);
+      return () => clearTimeout(timeoutId);
+    }
   }, []);
   useEffect(() => {
     if (authenticated) {
