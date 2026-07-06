@@ -6,4 +6,5 @@ server/node_modules
 server/dist
 .DS_Store
 *.log
-
+.env
+server/.env
