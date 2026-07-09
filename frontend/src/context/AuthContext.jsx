@@ -18,16 +18,18 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(readStoredUser);
 
   const login = useCallback(async (email, password) => {
-    const response = await loginUser({ email, password });
-    const nextToken = response.data.token;
-    const nextUser = response.data.user;
+    // loginUser returns the parsed response body directly (not an axios response object)
+    // Backend response shape: { message: string, data: { token, user } }
+    const responseBody = await loginUser({ email, password });
+    const nextToken = responseBody.data?.token ?? responseBody.token;
+    const nextUser = responseBody.data?.user ?? responseBody.user;
 
     localStorage.setItem('rnd_token', nextToken);
     localStorage.setItem('rnd_user', JSON.stringify(nextUser));
     setToken(nextToken);
     setUser(nextUser);
 
-    return response;
+    return responseBody;
   }, []);
 
   const logout = useCallback(() => {

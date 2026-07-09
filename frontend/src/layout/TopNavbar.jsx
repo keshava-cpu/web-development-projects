@@ -20,7 +20,7 @@ import { colors } from '../theme/colors';
 const navItems = [
   { label: 'Dashboard', path: '/' },
   { label: 'Funded Projects', path: '/projects' },
-  { label: 'Publications', path: '/publications' },
+  { label: 'Publications Tracker', path: '/publications-tracker/dashboard' },
   { label: 'Patents', path: '/patents' },
   { label: 'Consultancy', path: '/consultancy' },
   { label: 'Reports', path: '/reports' },

@@ -34,7 +34,13 @@ const LoginPage = () => {
       await login(email, password);
       navigate(location.state?.from?.pathname || '/projects', { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Check your credentials.');
+      // Handle both axios error response shapes and plain Error objects
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.data?.message ||
+        err.message ||
+        'Login failed. Check your credentials.';
+      setError(message);
     } finally {
       setLoading(false);
     }

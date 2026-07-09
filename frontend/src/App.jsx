@@ -2,14 +2,18 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import AppLayout from './layout/AppLayout';
 import DashboardPage from './pages/DashboardPage';
 import ProjectsDashboardPage from './pages/ProjectsDashboardPage';
+import PatentsPage from './pages/PatentsPage';
 import LoginPage from './pages/LoginPage';
 import PlaceholderPage from './pages/PlaceholderPage';
 import ProtectedRoute from './routes/ProtectedRoute';
+import PublicationsApp from './features/publications/PublicationsApp';
 
 const App = () => (
   <Routes>
+    {/* ── Public Routes ──────────────────────────────────────────────────── */}
     <Route path="/login" element={<LoginPage />} />
 
+    {/* ── Protected Routes (require vinay-temp email/password login) ─────── */}
     <Route
       element={
         <ProtectedRoute>
@@ -17,6 +21,7 @@ const App = () => (
         </ProtectedRoute>
       }
     >
+      {/* ── Feature A: R&D Management (vinay-temp / backend) ─────────────── */}
       <Route index element={<DashboardPage />} />
       <Route path="projects" element={<ProjectsDashboardPage />} />
       <Route
@@ -24,19 +29,11 @@ const App = () => (
         element={
           <PlaceholderPage
             title="Publications"
-            description="Publication tracking module will be implemented in the next phase."
+            description="Use the Publications Tracker in the navigation bar for the full publications workflow."
           />
         }
       />
-      <Route
-        path="patents"
-        element={
-          <PlaceholderPage
-            title="Patents"
-            description="Patent management views will be implemented in the next phase."
-          />
-        }
-      />
+      <Route path="patents" element={<PatentsPage />} />
       <Route
         path="consultancy"
         element={
@@ -55,8 +52,21 @@ const App = () => (
           />
         }
       />
+
+      {/* ── Feature B: Publications Tracker (Keshava-stdnt / server) ─────── */}
+      {/*
+       * All web/ routes are nested under /publications-tracker/*.
+       * PublicationsApp renders its own internal <Routes> for sub-paths.
+       * The /* wildcard is required so React Router passes the rest of
+       * the path to PublicationsApp's internal router.
+       */}
+      <Route
+        path="publications-tracker/*"
+        element={<PublicationsApp />}
+      />
     </Route>
 
+    {/* ── Catch-all ──────────────────────────────────────────────────────── */}
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import {
   Alert,
   Button,
@@ -11,7 +11,7 @@ import {
   Stack,
   TextField,
 } from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import PdfUploadField from './PdfUploadField';
 import { colors } from '../../theme/colors';
 
@@ -167,7 +167,7 @@ const AddProjectDialog = ({ open, onClose, onSubmit, submitting, error }) => {
         <Button
           type="submit" // Fires directly up into PaperProps form root natively
           variant="contained"
-          startIcon={<AddCircleOutlineIcon />}
+          startIcon={<AddCircleOutlinedIcon />}
           disabled={submitting}
         >
           {submitting ? 'Saving Project...' : 'Create Project'}
@@ -178,3 +178,4 @@ const AddProjectDialog = ({ open, onClose, onSubmit, submitting, error }) => {
 };
 
 export default AddProjectDialog;
+

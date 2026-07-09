@@ -1,4 +1,4 @@
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import { Typography, Box, Stack } from '@mui/material';
 import ProjectCard from './ProjectCard';
 import { colors } from '../../theme/colors';
@@ -64,3 +64,4 @@ const ProjectsGrid = ({ groupedProjects }) => (
 );
 
 export default ProjectsGrid;
+

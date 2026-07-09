@@ -1,15 +1,15 @@
+# Root
 node_modules/
 .env
 *.log
 .DS_Store
+
+# Backend
 backend/public/uploads/projects/*
 !backend/public/uploads/projects/.gitkeep
+backend/node_modules/
+backend/.env
+
+# Frontend
 frontend/dist/
 frontend/node_modules/
-node_modules
-dist
-web/node_modules
-web/dist
-server/node_modules
-server/dist
-server/.env
