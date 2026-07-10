@@ -7,6 +7,7 @@
  * Consumers: PublicationsApp (routes), FacultyRoute, AdminRoute, and any
  * page/view that needs feature-level state.
  */
+
 import {
   createContext,
   useCallback,
@@ -85,7 +86,7 @@ function loadStoredUserProfiles() {
     if (!Array.isArray(parsed)) return [];
     return parsed.filter(
       (item) =>
-        item && typeof item.email === "string" && typeof item.name === "string"
+        item && typeof item.email === "string" && typeof item.name === "string",
     );
   } catch {
     return [];
@@ -97,7 +98,7 @@ function mergeUserProfiles(base, stored) {
   return [
     ...base,
     ...stored.filter(
-      (profile) => !existingEmails.has(profile.email.toLowerCase())
+      (profile) => !existingEmails.has(profile.email.toLowerCase()),
     ),
   ];
 }
@@ -108,6 +109,7 @@ function persistStoredProfiles(profiles) {
     window.localStorage.setItem("rnd_user_profiles", JSON.stringify(profiles));
   } catch {
     // Ignore storage failures.
+    console.log("Local Storage Issue");
   }
 }
 
@@ -144,7 +146,12 @@ export function authFetch(url, token, options = {}) {
 const PublicationsContext = createContext(null);
 
 export function PublicationsProvider({ children }) {
-  const { user: authUser, token, isAuthenticated, logout: authLogout } = useAuth();
+  const {
+    user: authUser,
+    token,
+    isAuthenticated,
+    logout: authLogout,
+  } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -156,7 +163,7 @@ export function PublicationsProvider({ children }) {
   // ── State ────────────────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState(() =>
-    mergeUserProfiles(directoryUsers, loadStoredUserProfiles())
+    mergeUserProfiles(directoryUsers, loadStoredUserProfiles()),
   );
   const [entries, setEntries] = useState(sampleEntries);
   const [selectedEntryId, setSelectedEntryId] = useState(sampleEntries[0].id);
@@ -171,7 +178,7 @@ export function PublicationsProvider({ children }) {
 
   const detailMatch = matchPath(
     "/publications-tracker/dashboard/entries/:entryId",
-    location.pathname
+    location.pathname,
   );
   const routeEntryId = detailMatch?.params.entryId;
 
@@ -198,9 +205,9 @@ export function PublicationsProvider({ children }) {
   const currentUserProfile = useMemo(
     () =>
       users.find(
-        (user) => user.email.toLowerCase() === userEmail.toLowerCase()
+        (user) => user.email.toLowerCase() === userEmail.toLowerCase(),
       ),
-    [userEmail, users]
+    [userEmail, users],
   );
 
   const isKnownProfile = Boolean(userEmail && currentUserProfile);
@@ -244,13 +251,12 @@ export function PublicationsProvider({ children }) {
 
   const facultyProfile = useMemo(() => {
     const activeEntries = facultyOwnedEntries.filter(
-      (entry) =>
-        entry.status !== "published" && entry.status !== "closed"
+      (entry) => entry.status !== "published" && entry.status !== "closed",
     ).length;
     const publishedEntries = facultyOwnedEntries.filter(
       (entry) =>
         entry.status === "published" ||
-        entry.status === "approved_for_publication"
+        entry.status === "approved_for_publication",
     ).length;
     return {
       displayName: userDisplayName,
@@ -299,18 +305,18 @@ export function PublicationsProvider({ children }) {
         navigate("/publications-tracker/dashboard", { replace: true });
       }
     },
-    [addEntryNotification, navigate, users]
+    [addEntryNotification, navigate, users],
   );
 
   function markNotificationRead(id) {
     setNotifications((current) =>
-      current.map((n) => (n.id === id ? { ...n, unread: false } : n))
+      current.map((n) => (n.id === id ? { ...n, unread: false } : n)),
     );
   }
 
   function markAllNotificationsRead() {
     setNotifications((current) =>
-      current.map((n) => ({ ...n, unread: false }))
+      current.map((n) => ({ ...n, unread: false })),
     );
   }
 
@@ -322,18 +328,18 @@ export function PublicationsProvider({ children }) {
     setUsers((current) => {
       const normalizedEmail = profile.email.toLowerCase();
       const nextUsers = current.some(
-        (user) => user.email.toLowerCase() === normalizedEmail
+        (user) => user.email.toLowerCase() === normalizedEmail,
       )
         ? current.map((user) =>
-            user.email.toLowerCase() === normalizedEmail ? profile : user
+            user.email.toLowerCase() === normalizedEmail ? profile : user,
           )
         : [...current, profile];
       const extraProfiles = nextUsers.filter(
         (user) =>
           !directoryUsers.some(
             (reference) =>
-              reference.email.toLowerCase() === user.email.toLowerCase()
-          )
+              reference.email.toLowerCase() === user.email.toLowerCase(),
+          ),
       );
       persistStoredProfiles(extraProfiles);
       return nextUsers;
@@ -361,7 +367,10 @@ export function PublicationsProvider({ children }) {
         const user = await response.json();
         handleSuccessfulLogin(user);
       } else {
-        addEntryNotification("Sign in failed", "Failed to log in with mock account.");
+        addEntryNotification(
+          "Sign in failed",
+          "Failed to log in with mock account.",
+        );
       }
     } catch (error) {
       console.error("Mock sign in error:", error);
@@ -394,7 +403,7 @@ export function PublicationsProvider({ children }) {
     if (notificationsOpen) {
       const timeoutId = setTimeout(
         () => notificationsPanelRef.current?.focus(),
-        0
+        0,
       );
       return () => clearTimeout(timeoutId);
     }
@@ -492,7 +501,9 @@ export function PublicationsProvider({ children }) {
 export function usePublications() {
   const context = useContext(PublicationsContext);
   if (!context) {
-    throw new Error("usePublications must be used inside <PublicationsProvider>");
+    throw new Error(
+      "usePublications must be used inside <PublicationsProvider>",
+    );
   }
   return context;
 }

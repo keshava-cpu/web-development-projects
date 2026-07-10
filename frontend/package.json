@@ -34,6 +34,11 @@
     "prettier": "^3.8.5",
     "vite": "^8.0.16"
   },
+  "overrides": {
+    "eslint-plugin-jsx-a11y": {
+      "eslint": "^10.0.1"
+    }
+  },
   "lint-staged": {
     "**/*.{js,jsx}": [
       "npx prettier --write",

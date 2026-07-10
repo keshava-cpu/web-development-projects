@@ -1,25 +1,29 @@
-const pool = require('../config/db');
-const { sendSuccess } = require('../utils/response');
+const pool = require("../config/db").default;
+const { sendSuccess } = require("../utils/response");
 
 const getReports = async (req, res, next) => {
   try {
     const [[publicationCount]] = await pool.query(
-      'SELECT COUNT(*) AS total FROM publications'
+      "SELECT COUNT(*) AS total FROM publications",
     );
-    const [[patentCount]] = await pool.query('SELECT COUNT(*) AS total FROM patents');
+    const [[patentCount]] = await pool.query(
+      "SELECT COUNT(*) AS total FROM patents",
+    );
     const [[consultancyCount]] = await pool.query(
-      'SELECT COUNT(*) AS total FROM consultancy'
+      "SELECT COUNT(*) AS total FROM consultancy",
     );
-    const [[projectCount]] = await pool.query('SELECT COUNT(*) AS total FROM projects');
+    const [[projectCount]] = await pool.query(
+      "SELECT COUNT(*) AS total FROM projects",
+    );
     const [[consultancyAmount]] = await pool.query(
-      'SELECT COALESCE(SUM(amount), 0) AS total FROM consultancy'
+      "SELECT COALESCE(SUM(amount), 0) AS total FROM consultancy",
     );
     const [[projectAmount]] = await pool.query(
-      'SELECT COALESCE(SUM(amount), 0) AS total FROM projects'
+      "SELECT COALESCE(SUM(amount), 0) AS total FROM projects",
     );
 
     return sendSuccess(res, {
-      message: 'Reports retrieved successfully.',
+      message: "Reports retrieved successfully.",
       data: {
         totals: {
           publications: publicationCount.total,

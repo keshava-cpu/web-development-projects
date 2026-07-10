@@ -1,5 +1,5 @@
-import { createTheme } from '@mui/material/styles';
-import { colors } from './colors';
+import { createTheme } from "@mui/material/styles";
+import { colors } from "./colors";
 
 const theme = createTheme({
   palette: {
@@ -37,7 +37,7 @@ const theme = createTheme({
     h4: {
       fontWeight: 700,
       color: colors.midnightBlue,
-      letterSpacing: '-0.02em',
+      letterSpacing: "-0.02em",
     },
     h5: {
       fontWeight: 600,
@@ -64,7 +64,7 @@ const theme = createTheme({
       lineHeight: 1.5,
     },
     button: {
-      textTransform: 'none',
+      textTransform: "none",
       fontWeight: 600,
     },
   },
@@ -76,16 +76,16 @@ const theme = createTheme({
       styleOverrides: {
         containedPrimary: {
           backgroundColor: colors.academicBlue,
-          '&:hover': {
+          "&:hover": {
             backgroundColor: colors.strongBlue,
           },
         },
         outlinedPrimary: {
           borderColor: colors.academicBlue,
           color: colors.academicBlue,
-          '&:hover': {
+          "&:hover": {
             borderColor: colors.strongBlue,
-            backgroundColor: 'rgba(0, 91, 150, 0.04)',
+            backgroundColor: "rgba(0, 91, 150, 0.04)",
           },
         },
       },
@@ -93,7 +93,7 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          border: `1px solid ${colors.lightSteel}`,
+          border: `none`, // Border is put to none
         },
       },
     },
@@ -101,7 +101,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           border: `1px solid ${colors.lightSteel}`,
-          boxShadow: '0 1px 3px rgba(11, 45, 77, 0.06)',
+          boxShadow: "0 1px 3px rgba(11, 45, 77, 0.06)",
         },
       },
     },

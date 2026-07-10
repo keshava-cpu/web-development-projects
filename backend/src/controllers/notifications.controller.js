@@ -1,5 +1,5 @@
-const pool = require('../config/db');
-const { sendSuccess } = require('../utils/response');
+const pool = require("../config/db").default;
+const { sendSuccess } = require("../utils/response");
 
 const getNotifications = async (req, res, next) => {
   try {
@@ -10,11 +10,11 @@ const getNotifications = async (req, res, next) => {
        FROM notifications
        WHERE user_id = ?
        ORDER BY created_at DESC`,
-      [userId]
+      [userId],
     );
 
     return sendSuccess(res, {
-      message: 'Notifications retrieved successfully.',
+      message: "Notifications retrieved successfully.",
       data: rows,
     });
   } catch (error) {

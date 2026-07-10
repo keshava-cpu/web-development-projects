@@ -1,12 +1,13 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
-import AppLayout from './layout/AppLayout';
-import DashboardPage from './pages/DashboardPage';
-import ProjectsDashboardPage from './pages/ProjectsDashboardPage';
-import PatentsPage from './pages/PatentsPage';
-import LoginPage from './pages/LoginPage';
-import PlaceholderPage from './pages/PlaceholderPage';
-import ProtectedRoute from './routes/ProtectedRoute';
-import PublicationsApp from './features/publications/PublicationsApp';
+import { Navigate, Route, Routes } from "react-router-dom";
+import AppLayout from "./layout/AppLayout";
+import DashboardPage from "./pages/DashboardPage";
+import ProjectsDashboardPage from "./pages/ProjectsDashboardPage";
+import PatentsPage from "./pages/PatentsPage";
+import LoginPage from "./pages/LoginPage";
+import PlaceholderPage from "./pages/PlaceholderPage";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import PublicationsApp from "./features/publications/PublicationsApp";
+import { PublicationsProvider } from "./features/publications/context/PublicationsContext";
 
 const App = () => (
   <Routes>
@@ -16,9 +17,11 @@ const App = () => (
     {/* ── Protected Routes (require vinay-temp email/password login) ─────── */}
     <Route
       element={
-        <ProtectedRoute>
-          <AppLayout />
-        </ProtectedRoute>
+        <PublicationsProvider>
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        </PublicationsProvider>
       }
     >
       {/* ── Feature A: R&D Management (vinay-temp / backend) ─────────────── */}
@@ -60,10 +63,7 @@ const App = () => (
        * The /* wildcard is required so React Router passes the rest of
        * the path to PublicationsApp's internal router.
        */}
-      <Route
-        path="publications-tracker/*"
-        element={<PublicationsApp />}
-      />
+      <Route path="publications-tracker/*" element={<PublicationsApp />} />
     </Route>
 
     {/* ── Catch-all ──────────────────────────────────────────────────────── */}

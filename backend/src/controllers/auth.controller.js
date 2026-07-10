@@ -1,8 +1,8 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const pool = require('../config/db');
-const jwtConfig = require('../config/jwt');
-const { sendSuccess, sendFailure } = require('../utils/response');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const pool = require("../config/db");
+const jwtConfig = require("../config/jwt");
+const { sendSuccess, sendFailure } = require("../utils/response");
 
 const register = async (req, res, next) => {
   try {
@@ -11,27 +11,30 @@ const register = async (req, res, next) => {
     if (!name || !email || !password || !role) {
       return sendFailure(res, {
         statusCode: 400,
-        message: 'Name, email, password, and role are required.',
+        message: "Name, email, password, and role are required.",
       });
     }
 
-    const [existing] = await pool.query('SELECT user_id FROM users WHERE email = ?', [email]);
+    const [existing] = await pool.query(
+      "SELECT user_id FROM users WHERE email = ?",
+      [email],
+    );
     if (existing.length > 0) {
       return sendFailure(res, {
         statusCode: 409,
-        message: 'A user with this email already exists.',
+        message: "A user with this email already exists.",
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const [result] = await pool.query(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [name, email, hashedPassword, role]
+      "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+      [name, email, hashedPassword, role],
     );
 
     return sendSuccess(res, {
       statusCode: 201,
-      message: 'User registered successfully.',
+      message: "User registered successfully.",
       data: { user_id: result.insertId, name, email, role },
     });
   } catch (error) {
@@ -46,40 +49,40 @@ const login = async (req, res, next) => {
     if (!email || !password) {
       return sendFailure(res, {
         statusCode: 400,
-        message: 'Email and password are required.',
+        message: "Email and password are required.",
       });
     }
 
-    if (email === '24071a6640@vnrvjiet.in' && password === 'vnrvjiet') {
+    if (email === "24071a6640@vnrvjiet.in" && password === "vnrvjiet") {
       const token = jwt.sign(
-        { user_id: 9999, email: '24071a6640@vnrvjiet.in', role: 'admin' },
+        { user_id: 9999, email: "24071a6640@vnrvjiet.in", role: "admin" },
         jwtConfig.secret,
-        { expiresIn: jwtConfig.expiresIn }
+        { expiresIn: jwtConfig.expiresIn },
       );
-      
+
       return sendSuccess(res, {
-        message: 'Login successful.',
+        message: "Login successful.",
         data: {
           token,
           user: {
             user_id: 9999,
-            name: 'Bypass User',
-            email: '24071a6640@vnrvjiet.in',
-            role: 'admin',
+            name: "Bypass User",
+            email: "24071a6640@vnrvjiet.in",
+            role: "admin",
           },
         },
       });
     }
 
     const [rows] = await pool.query(
-      'SELECT user_id, name, email, password, role FROM users WHERE email = ?',
-      [email]
+      "SELECT user_id, name, email, password, role FROM users WHERE email = ?",
+      [email],
     );
 
     if (rows.length === 0) {
       return sendFailure(res, {
         statusCode: 401,
-        message: 'Invalid email or password.',
+        message: "Invalid email or password.",
       });
     }
 
@@ -89,18 +92,18 @@ const login = async (req, res, next) => {
     if (!isMatch) {
       return sendFailure(res, {
         statusCode: 401,
-        message: 'Invalid email or password.',
+        message: "Invalid email or password.",
       });
     }
 
     const token = jwt.sign(
       { user_id: user.user_id, email: user.email, role: user.role },
       jwtConfig.secret,
-      { expiresIn: jwtConfig.expiresIn }
+      { expiresIn: jwtConfig.expiresIn },
     );
 
     return sendSuccess(res, {
-      message: 'Login successful.',
+      message: "Login successful.",
       data: {
         token,
         user: {
