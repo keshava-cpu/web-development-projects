@@ -1,5 +1,5 @@
-const pool = require('../config/db');
-const { sendSuccess, sendFailure } = require('../utils/response');
+const pool = require("../config/db").default;
+const { sendSuccess, sendFailure } = require("../utils/response");
 
 const createPublication = async (req, res, next) => {
   try {
@@ -7,17 +7,20 @@ const createPublication = async (req, res, next) => {
     const userId = req.user.user_id;
 
     if (!title) {
-      return sendFailure(res, { statusCode: 400, message: 'Title is required.' });
+      return sendFailure(res, {
+        statusCode: 400,
+        message: "Title is required.",
+      });
     }
 
     const [result] = await pool.query(
-      'INSERT INTO publications (user_id, title, doi, year, proof) VALUES (?, ?, ?, ?, ?)',
-      [userId, title, doi || null, year || null, proof || null]
+      "INSERT INTO publications (user_id, title, doi, year, proof) VALUES (?, ?, ?, ?, ?)",
+      [userId, title, doi || null, year || null, proof || null],
     );
 
     return sendSuccess(res, {
       statusCode: 201,
-      message: 'Publication created successfully.',
+      message: "Publication created successfully.",
       data: { publication_id: result.insertId, title, doi, year, proof },
     });
   } catch (error) {
@@ -30,11 +33,11 @@ const getPublications = async (req, res, next) => {
     const [rows] = await pool.query(
       `SELECT publication_id, user_id, title, doi, year, proof, created_at, updated_at
        FROM publications
-       ORDER BY created_at DESC`
+       ORDER BY created_at DESC`,
     );
 
     return sendSuccess(res, {
-      message: 'Publications retrieved successfully.',
+      message: "Publications retrieved successfully.",
       data: rows,
     });
   } catch (error) {
@@ -48,12 +51,15 @@ const updatePublication = async (req, res, next) => {
     const { title, doi, year, proof } = req.body;
 
     const [existing] = await pool.query(
-      'SELECT publication_id FROM publications WHERE publication_id = ?',
-      [id]
+      "SELECT publication_id FROM publications WHERE publication_id = ?",
+      [id],
     );
 
     if (existing.length === 0) {
-      return sendFailure(res, { statusCode: 404, message: 'Publication not found.' });
+      return sendFailure(res, {
+        statusCode: 404,
+        message: "Publication not found.",
+      });
     }
 
     await pool.query(
@@ -63,16 +69,16 @@ const updatePublication = async (req, res, next) => {
            year = COALESCE(?, year),
            proof = COALESCE(?, proof)
        WHERE publication_id = ?`,
-      [title, doi, year, proof, id]
+      [title, doi, year, proof, id],
     );
 
     const [updated] = await pool.query(
-      'SELECT publication_id, user_id, title, doi, year, proof FROM publications WHERE publication_id = ?',
-      [id]
+      "SELECT publication_id, user_id, title, doi, year, proof FROM publications WHERE publication_id = ?",
+      [id],
     );
 
     return sendSuccess(res, {
-      message: 'Publication updated successfully.',
+      message: "Publication updated successfully.",
       data: updated[0],
     });
   } catch (error) {
@@ -85,16 +91,19 @@ const deletePublication = async (req, res, next) => {
     const { id } = req.params;
 
     const [result] = await pool.query(
-      'DELETE FROM publications WHERE publication_id = ?',
-      [id]
+      "DELETE FROM publications WHERE publication_id = ?",
+      [id],
     );
 
     if (result.affectedRows === 0) {
-      return sendFailure(res, { statusCode: 404, message: 'Publication not found.' });
+      return sendFailure(res, {
+        statusCode: 404,
+        message: "Publication not found.",
+      });
     }
 
     return sendSuccess(res, {
-      message: 'Publication deleted successfully.',
+      message: "Publication deleted successfully.",
       data: { publication_id: Number(id) },
     });
   } catch (error) {

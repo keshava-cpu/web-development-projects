@@ -6,16 +6,19 @@
  * These are separate from backend's existing /api/publications (MySQL-backed).
  * These routes use the in-memory apiEntries array from server/.
  */
-const express = require('express');
-const { apiEntries } = require('../../data/keshavaData');
+const protect = require("../../middleware/protect");
+const express = require("express");
+const { apiEntries } = require("../../data/keshavaData");
 
 const router = express.Router();
+
+router.use(protect);
 
 /**
  * GET /api/keshava/publications
  * Returns all in-memory publication entries. Public endpoint.
  */
-router.get('/', (_req, res) => {
+router.get("/", (_req, res) => {
   res.json({ items: apiEntries });
 });
 
@@ -23,20 +26,32 @@ router.get('/', (_req, res) => {
  * POST /api/keshava/publications
  * Creates a new in-memory publication entry. Requires authenticated user.
  */
-router.post('/', (req, res) => {
+router.post("/", (req, res) => {
   if (!req.user) {
-    res.status(401).json({ error: 'not_authenticated' });
+    console.log("baaaaaaaad!!!!");
+    res.status(401).json({ error: "not_authenticated" });
     return;
   }
 
   const {
-    id, title, department, owner, contributors, status,
-    summary, latestFile, updatedAt, metrics, versions,
-    timeline, messages, adminNotes,
+    id,
+    title,
+    department,
+    owner,
+    contributors,
+    status,
+    summary,
+    latestFile,
+    updatedAt,
+    metrics,
+    versions,
+    timeline,
+    messages,
+    adminNotes,
   } = req.body;
 
   if (!id || !title || !department || !owner) {
-    res.status(400).json({ error: 'missing_required_fields' });
+    res.status(400).json({ error: "missing_required_fields" });
     return;
   }
 
@@ -46,9 +61,9 @@ router.post('/', (req, res) => {
     department,
     owner,
     contributors: contributors || [owner],
-    status: status || 'draft',
-    summary: summary || '',
-    latestFile: latestFile || 'draft.pdf',
+    status: status || "draft",
+    summary: summary || "",
+    latestFile: latestFile || "draft.pdf",
     updatedAt: updatedAt || new Date().toISOString(),
     metrics: metrics || { messageCount: 0, impactPoints: 0 },
     versions: versions || [],
@@ -65,9 +80,9 @@ router.post('/', (req, res) => {
  * POST /api/keshava/publications/:id/status
  * Updates the status of a publication entry. Requires authenticated user.
  */
-router.post('/:id/status', (req, res) => {
+router.post("/:id/status", (req, res) => {
   if (!req.user) {
-    res.status(401).json({ error: 'not_authenticated' });
+    res.status(401).json({ error: "not_authenticated" });
     return;
   }
 
@@ -75,15 +90,18 @@ router.post('/:id/status', (req, res) => {
   const target = apiEntries.find((entry) => entry.id === req.params.id);
 
   if (!target || !nextStatus) {
-    res.status(400).json({ error: 'publication_not_found_or_invalid_status' });
+    res.status(400).json({ error: "publication_not_found_or_invalid_status" });
     return;
   }
 
   target.status = nextStatus;
 
-  if (nextStatus === 'in_review') {
+  if (nextStatus === "in_review") {
     target.reviewRequestedAt = new Date().toLocaleString([], {
-      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   }
 
@@ -102,29 +120,36 @@ router.post('/:id/status', (req, res) => {
  * POST /api/keshava/publications/:id/update
  * Updates fields on a publication. Only the owner can edit. Requires authenticated user.
  */
-router.post('/:id/update', (req, res) => {
+router.post("/:id/update", (req, res) => {
   if (!req.user) {
-    res.status(401).json({ error: 'not_authenticated' });
+    res.status(401).json({ error: "not_authenticated" });
     return;
   }
 
   const target = apiEntries.find((entry) => entry.id === req.params.id);
   if (!target) {
-    res.status(404).json({ error: 'publication_not_found' });
+    res.status(404).json({ error: "publication_not_found" });
     return;
   }
 
   if (target.owner !== req.user.email) {
+    console.log("yeaaaaaaa");
     res.status(403).json({
-      error: 'unauthorized',
-      message: 'Only the entry owner can edit this publication',
+      error: "unauthorized",
+      message: "Only the entry owner can edit this publication",
     });
     return;
   }
 
   const {
-    title, department, summary, contributors,
-    latestFile, metrics, newVersion, timelineEvent,
+    title,
+    department,
+    summary,
+    contributors,
+    latestFile,
+    metrics,
+    newVersion,
+    timelineEvent,
   } = req.body;
 
   if (title !== undefined) target.title = title;

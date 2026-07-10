@@ -1,45 +1,49 @@
-import Grid from '@mui/material/Grid';
-import { Box, Button, Paper, Stack, Typography } from '@mui/material';
-import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
-import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
-import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
-import BalanceOutlinedIcon from '@mui/icons-material/BalanceOutlined';
-import { useNavigate } from 'react-router-dom';
-import { colors } from '../theme/colors';
+import Grid from "@mui/material/Grid";
+import { Box, Button, Paper, Stack, Typography } from "@mui/material";
+import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
+import BalanceOutlinedIcon from "@mui/icons-material/BalanceOutlined";
+import { useNavigate } from "react-router-dom";
+import { colors } from "../theme/colors";
 
 const moduleCards = [
   {
-    title: 'Funded Projects',
-    description: 'Monitor agency grants, utilization reports, and investigator assignments.',
+    title: "Funded Projects",
+    description:
+      "Monitor agency grants, utilization reports, and investigator assignments.",
     icon: AssignmentOutlinedIcon,
-    path: '/projects',
-    btnLabel: 'Open Projects',
-    btnId: 'dashboard-projects-btn',
+    path: "/projects",
+    btnLabel: "Open Projects",
+    btnId: "dashboard-projects-btn",
   },
   {
-    title: 'Publications Tracker',
-    description: 'Submit, review, and track academic publications through the full editorial workflow.',
+    title: "Publications Tracker",
+    description:
+      "Submit, review, and track academic publications through the full editorial workflow.",
     icon: ScienceOutlinedIcon,
-    path: '/publications-tracker/dashboard',
-    btnLabel: 'Open Publications',
-    btnId: 'dashboard-publications-btn',
+    path: "/publications-tracker/dashboard",
+    btnLabel: "Open Publications",
+    btnId: "dashboard-publications-btn",
   },
   {
-    title: 'Patents',
-    description: 'Record and manage Filed, Published, and Granted patents with full RBAC control.',
+    title: "Patents",
+    description:
+      "Record and manage Filed, Published, and Granted patents with full RBAC control.",
     icon: BalanceOutlinedIcon,
-    path: '/patents',
-    btnLabel: 'Open Patents',
-    btnId: 'dashboard-patents-btn',
+    path: "/patents",
+    btnLabel: "Open Patents",
+    btnId: "dashboard-patents-btn",
     highlight: true,
   },
   {
-    title: 'Analytics & Reports',
-    description: 'Review aggregate metrics across the R&D management ecosystem.',
+    title: "Analytics & Reports",
+    description:
+      "Review aggregate metrics across the R&D management ecosystem.",
     icon: TrendingUpOutlinedIcon,
-    path: '/reports',
-    btnLabel: 'View Reports',
-    btnId: 'dashboard-reports-btn',
+    path: "/reports",
+    btnLabel: "View Reports",
+    btnId: "dashboard-reports-btn",
   },
 ];
 
@@ -59,8 +63,9 @@ const DashboardPage = () => {
           Research Dashboard
         </Typography>
         <Typography variant="body1">
-          Welcome to the R&D Management workspace. Use the navigation bar or the shortcuts
-          below to access funded projects, publications, patents, and institutional reports.
+          Welcome to the R&D Management workspace. Use the navigation bar or the
+          shortcuts below to access funded projects, publications, patents, and
+          institutional reports.
         </Typography>
       </Paper>
 
@@ -72,17 +77,17 @@ const DashboardPage = () => {
               <Paper
                 sx={{
                   p: 3,
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
                   bgcolor: colors.white,
                   border: card.highlight
                     ? `1.5px solid ${colors.innovationCyan}`
                     : `1px solid ${colors.lightSteel}`,
-                  transition: 'box-shadow 0.18s ease, transform 0.18s ease',
-                  '&:hover': {
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                    transform: 'translateY(-2px)',
+                  transition: "box-shadow 0.18s ease, transform 0.18s ease",
+                  "&:hover": {
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                    transform: "translateY(-2px)",
                   },
                 }}
               >
@@ -92,11 +97,11 @@ const DashboardPage = () => {
                       width: 44,
                       height: 44,
                       borderRadius: 2,
-                      display: 'grid',
-                      placeItems: 'center',
+                      display: "grid",
+                      placeItems: "center",
                       bgcolor: card.highlight
-                        ? 'rgba(0,188,212,0.12)'
-                        : 'rgba(0, 150, 136, 0.12)',
+                        ? "rgba(0,188,212,0.12)"
+                        : "rgba(0, 150, 136, 0.12)",
                     }}
                   >
                     <Icon
@@ -116,7 +121,7 @@ const DashboardPage = () => {
                 <Box mt={2}>
                   <Button
                     id={card.btnId}
-                    variant={card.highlight ? 'contained' : 'outlined'}
+                    variant={card.highlight ? "contained" : "outlined"}
                     size="small"
                     fullWidth
                     onClick={() => navigate(card.path)}
@@ -126,7 +131,7 @@ const DashboardPage = () => {
                             bgcolor: colors.innovationCyan,
                             color: colors.midnightBlue,
                             fontWeight: 700,
-                            '&:hover': { bgcolor: '#33c9da' },
+                            "&:hover": { bgcolor: "#33c9da" },
                           }
                         : {}
                     }
