@@ -230,7 +230,7 @@ export default function ProfilePage({ facultyProfile, users, entries, currentUse
         {/* Stats */}
         <Grid container spacing={2} sx={{ borderBottom: "1px solid #D9E2EC", bgcolor: "#FAFCFE", px: { xs: 2, sm: 4 }, py: 3 }}>
           {summaryStats.map((s) => (
-            <Grid item xs={6} lg={3} key={s.label}>
+            <Grid size={{ xs: 6, lg: 3 }}   key={s.label}>
               <Card
                 sx={{
                   borderRadius: "16px",
@@ -265,7 +265,7 @@ export default function ProfilePage({ facultyProfile, users, entries, currentUse
           {/* TAB 0: OVERVIEW */}
           {activeTab === 0 && (
             <Grid container spacing={3}>
-              <Grid item xs={12} lg={8}>
+              <Grid size={{ xs: 12, lg: 8 }}  >
                 <Stack spacing={3}>
                   <Card sx={{ borderRadius: "16px", p: 3 }}>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: "#0B2D4D", borderBottom: "1px solid #F1F5F9", pb: 1.5 }}>
@@ -297,7 +297,7 @@ export default function ProfilePage({ facultyProfile, users, entries, currentUse
                 </Stack>
               </Grid>
 
-              <Grid item xs={12} lg={4}>
+              <Grid size={{ xs: 12, lg: 4 }}  >
                 <Card sx={{ borderRadius: "16px", p: 3, bgcolor: "#FAFCFE" }}>
                   <Typography variant="h6" sx={{ fontWeight: 700, color: "#0B2D4D", borderBottom: "1px solid #D9E2EC", pb: 1.5 }}>
                     Researcher Details
@@ -402,7 +402,7 @@ export default function ProfilePage({ facultyProfile, users, entries, currentUse
           {/* TAB 2: DIRECTORY */}
           {activeTab === 3 && (
             <Grid ref={directoryRef} container spacing={3}>
-              <Grid item xs={12} lg={6}>
+              <Grid size={{ xs: 12, lg: 6 }}  >
                 <Stack spacing={2}>
                   {/* Search + filter panel */}
                   <Card sx={{ borderRadius: "16px", p: 2.5 }}>
@@ -593,7 +593,7 @@ export default function ProfilePage({ facultyProfile, users, entries, currentUse
                 </Stack>
               </Grid>
 
-              <Grid item xs={12} lg={6}>
+              <Grid size={{ xs: 12, lg: 6 }}  >
                 {selectedPerson ? (
                   <Card sx={{ borderRadius: "16px", p: 3 }}>
                     <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
@@ -685,7 +685,7 @@ export default function ProfilePage({ facultyProfile, users, entries, currentUse
           {activeTab === 3 && activeTab !== 3 && null}
           {activeTab === 2 && (
             <Grid container spacing={3}>
-              <Grid item xs={12} lg={6}>
+              <Grid size={{ xs: 12, lg: 6 }}  >
                 <Card sx={{ borderRadius: "16px", p: 3 }}>
                   <Typography variant="h6" sx={{ fontWeight: 700, color: "#0B2D4D" }}>Security &amp; Preferences</Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -746,7 +746,7 @@ export default function ProfilePage({ facultyProfile, users, entries, currentUse
                 </Card>
               </Grid>
 
-              <Grid item xs={12} lg={6}>
+              <Grid size={{ xs: 12, lg: 6 }}  >
                 <Card sx={{ borderRadius: "16px", p: 3, bgcolor: "#F8FAFC" }}>
                   <Typography variant="h6" sx={{ fontWeight: 700, color: "#0B2D4D" }}>Privacy Policy &amp; Access Notes</Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>

@@ -111,7 +111,6 @@ const CreateEntryView = ({
                 const response = await fetch("/api/keshava/publications", {
                   method: "POST",
                   credentials: "include",
-                  // 👇 Fixed: Token is now correctly placed inside the headers block
                   headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token || localStorage.getItem("token")}`,
@@ -207,7 +206,7 @@ const CreateEntryView = ({
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}  >
                       <Typography
                         variant="body2"
                         sx={{ fontWeight: 500, mb: 0.75, color: "#1F2933" }}

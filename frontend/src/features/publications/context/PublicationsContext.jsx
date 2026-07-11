@@ -18,14 +18,8 @@ import {
   useState,
 } from "react";
 import { useLocation, useNavigate, matchPath } from "react-router-dom";
-import {
-  defaultNotifications,
-  directoryUsers,
-  findDirectoryUser,
-  initialRole,
-  sampleEntries,
-} from "../mockData";
 import { useAuth } from "../../../context/AuthContext";
+
 
 // ─── Helpers (module-scoped, not exported) ────────────────────────────────────
 export function shortId() {
@@ -157,18 +151,21 @@ export function PublicationsProvider({ children }) {
 
   const userEmail = authUser?.email || "";
   const userName = authUser?.name || authUser?.email || "";
-  const role = authUser?.role || initialRole;
+  // TODO: fallback role was initialRole from mockData, using least-privileged default 'Faculty'
+  const role = authUser?.role || "Faculty";
   const isAdmin = role === "admin";
 
   // ── State ────────────────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState(() =>
-    mergeUserProfiles(directoryUsers, loadStoredUserProfiles()),
+    mergeUserProfiles([], loadStoredUserProfiles()),
   );
-  const [entries, setEntries] = useState(sampleEntries);
-  const [selectedEntryId, setSelectedEntryId] = useState(sampleEntries[0].id);
+  const [entries, setEntries] = useState([]);
+  const [entriesLoading, setEntriesLoading] = useState(false);
+  const [entriesError, setEntriesError] = useState(null);
+  const [selectedEntryId, setSelectedEntryId] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [notifications, setNotifications] = useState(defaultNotifications);
+  const [notifications, setNotifications] = useState([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const notificationsRef = useRef(null);
   const notificationsPanelRef = useRef(null);
@@ -186,16 +183,18 @@ export function PublicationsProvider({ children }) {
   useEffect(() => {
     if (!isAuthenticated) return;
     const controller = new AbortController();
+    setEntriesLoading(true);
+    setEntriesError(null);
     authFetch("/api/keshava/publications", token, { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
-        if (data.items && data.items.length > 0) {
-          setEntries(data.items);
-        }
+        setEntries(Array.isArray(data.items) ? data.items : []);
+        setEntriesLoading(false);
       })
       .catch((err) => {
         if (err.name !== "AbortError") {
-          console.error("Error fetching keshava publications:", err);
+          setEntriesError("Failed to load publications. Please retry.");
+          setEntriesLoading(false);
         }
       });
     return () => controller.abort();
@@ -290,7 +289,10 @@ export function PublicationsProvider({ children }) {
   const handleSuccessfulLogin = useCallback(
     (user) => {
       const normalizedEmail = user.email.toLowerCase();
-      const existingProfile = findDirectoryUser(normalizedEmail, users);
+      // Check if the user already has a saved profile in the merged users array
+      const existingProfile = users.find(
+        (u) => u.email.toLowerCase() === normalizedEmail,
+      );
       const shouldRouteToSetup = !existingProfile;
       const title = getLoginNotificationTitle(normalizedEmail);
       const detail = user.name
@@ -438,6 +440,8 @@ export function PublicationsProvider({ children }) {
     // Entries state
     entries,
     setEntries,
+    entriesLoading,
+    entriesError,
     selectedEntryId,
     setSelectedEntryId,
     selectedEntry,

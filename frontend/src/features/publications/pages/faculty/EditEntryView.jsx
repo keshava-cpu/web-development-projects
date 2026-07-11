@@ -274,7 +274,7 @@ const EditEntryView = ({
                       </Typography>
                     </Box>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}  >
                         <Typography
                           variant="caption"
                           sx={{ fontWeight: 500, color: "text.secondary" }}
@@ -295,7 +295,7 @@ const EditEntryView = ({
                           {selectedEntry.title}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}  >
                         <Typography
                           variant="caption"
                           sx={{ fontWeight: 500, color: "text.secondary" }}
@@ -346,7 +346,7 @@ const EditEntryView = ({
                       </Typography>
                     </Box>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}  >
                         <Typography
                           variant="caption"
                           sx={{ fontWeight: 500, color: "text.secondary" }}
@@ -369,7 +369,7 @@ const EditEntryView = ({
                           {selectedEntry.summary}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}  >
                         <Typography
                           variant="caption"
                           sx={{ fontWeight: 500, color: "text.secondary" }}
@@ -529,7 +529,7 @@ const EditEntryView = ({
                   </Box>
 
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}  >
                       <Typography
                         variant="body2"
                         sx={{ fontWeight: 500, mb: 0.75, color: "#1F2933" }}
@@ -555,7 +555,7 @@ const EditEntryView = ({
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }}  >
                       <Typography
                         variant="body2"
                         sx={{ fontWeight: 500, mb: 0.75, color: "#1F2933" }}

@@ -4,7 +4,8 @@ import DashboardPage from "./pages/DashboardPage";
 import ProjectsDashboardPage from "./pages/ProjectsDashboardPage";
 import PatentsPage from "./pages/PatentsPage";
 import LoginPage from "./pages/LoginPage";
-import PlaceholderPage from "./pages/PlaceholderPage";
+import ConsultancyPage from "./pages/ConsultancyPage";
+import ReportsPage from "./pages/ReportsPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicationsApp from "./features/publications/PublicationsApp";
 import { PublicationsProvider } from "./features/publications/context/PublicationsContext";
@@ -14,7 +15,7 @@ const App = () => (
     {/* ── Public Routes ──────────────────────────────────────────────────── */}
     <Route path="/login" element={<LoginPage />} />
 
-    {/* ── Protected Routes (require vinay-temp email/password login) ─────── */}
+    {/* ── Protected Routes ────────────────────────────────────────────────── */}
     <Route
       element={
         <PublicationsProvider>
@@ -24,41 +25,16 @@ const App = () => (
         </PublicationsProvider>
       }
     >
-      {/* ── Feature A: R&D Management (vinay-temp / backend) ─────────────── */}
+      {/* ── Feature A: R&D Management ───────────────────────────────────── */}
       <Route index element={<DashboardPage />} />
       <Route path="projects" element={<ProjectsDashboardPage />} />
-      <Route
-        path="publications"
-        element={
-          <PlaceholderPage
-            title="Publications"
-            description="Use the Publications Tracker in the navigation bar for the full publications workflow."
-          />
-        }
-      />
       <Route path="patents" element={<PatentsPage />} />
-      <Route
-        path="consultancy"
-        element={
-          <PlaceholderPage
-            title="Consultancy"
-            description="Consultancy records module will be implemented in the next phase."
-          />
-        }
-      />
-      <Route
-        path="reports"
-        element={
-          <PlaceholderPage
-            title="Reports"
-            description="Aggregate reporting dashboards will be implemented in the next phase."
-          />
-        }
-      />
+      <Route path="consultancy" element={<ConsultancyPage />} />
+      <Route path="reports" element={<ReportsPage />} />
 
-      {/* ── Feature B: Publications Tracker (Keshava-stdnt / server) ─────── */}
+      {/* ── Feature B: Publications Tracker ─────────────────────────────── */}
       {/*
-       * All web/ routes are nested under /publications-tracker/*.
+       * All routes are nested under /publications-tracker/*.
        * PublicationsApp renders its own internal <Routes> for sub-paths.
        * The /* wildcard is required so React Router passes the rest of
        * the path to PublicationsApp's internal router.

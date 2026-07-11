@@ -3,6 +3,8 @@ import { loginUser } from '../api/auth';
 
 const AuthContext = createContext(null);
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+
 const readStoredUser = () => {
   const raw = localStorage.getItem('rnd_user');
   if (!raw) return null;
@@ -17,22 +19,32 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem('rnd_token'));
   const [user, setUser] = useState(readStoredUser);
 
+  // ── Email / Password login ────────────────────────────────────────────────
   const login = useCallback(async (email, password) => {
-    // loginUser returns the parsed response body directly (not an axios response object)
-    // Backend response shape: { message: string, data: { token, user } }
-    const responseBody = await loginUser({ email, password });
-    const nextToken = responseBody.data?.token ?? responseBody.token;
-    const nextUser = responseBody.data?.user ?? responseBody.user;
+    const response = await loginUser({ email, password });
+    
+    // The response body is strictly { status, message, data: { user: { ... } } }
+    const { user: nextUser } = response.data;
 
-    localStorage.setItem('rnd_token', nextToken);
-    localStorage.setItem('rnd_user', JSON.stringify(nextUser));
-    setToken(nextToken);
-    setUser(nextUser);
+    if (nextUser) {
+      localStorage.setItem('rnd_user', JSON.stringify(nextUser));
+      setUser(nextUser);
+    }
 
-    return responseBody;
+    return response;
   }, []);
 
-  const logout = useCallback(() => {
+  // ── Logout ────────────────────────────────────────────────────────────────
+  const logout = useCallback(async () => {
+    try {
+      // Clear the httpOnly cookie on the server
+      await fetch(`${API_BASE}/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      // Ignore network errors on logout
+    }
     localStorage.removeItem('rnd_token');
     localStorage.removeItem('rnd_user');
     setToken(null);
@@ -43,11 +55,11 @@ export const AuthProvider = ({ children }) => {
     () => ({
       token,
       user,
-      isAuthenticated: Boolean(token),
+      isAuthenticated: Boolean(user),
       login,
       logout,
     }),
-    [token, user, login, logout]
+    [token, user, login, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

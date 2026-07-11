@@ -34,12 +34,12 @@ const LoginPage = () => {
       await login(email, password);
       navigate(location.state?.from?.pathname || '/projects', { replace: true });
     } catch (err) {
-      // Handle both axios error response shapes and plain Error objects
+      console.error('Login request failed:', err);
+      // Show exactly what the API returned, no fallback error object message.
       const message =
         err.response?.data?.message ||
         err.response?.data?.data?.message ||
-        err.message ||
-        'Login failed. Check your credentials.';
+        'Login failed';
       setError(message);
     } finally {
       setLoading(false);
@@ -57,8 +57,6 @@ const LoginPage = () => {
       }}
     >
       <Paper
-        component="form"
-        onSubmit={handleSubmit}
         sx={{
           width: '100%',
           maxWidth: 440,
@@ -69,35 +67,55 @@ const LoginPage = () => {
         <Stack spacing={3}>
           <Box>
             <Typography variant="h5" gutterBottom>
-              R&D Management Login
+              R&amp;D Management Login
             </Typography>
-            <Typography variant="body2">
+            <Typography variant="body2" color="text.secondary">
               Sign in to manage funded projects and research records.
             </Typography>
           </Box>
 
           {error && <Alert severity="error">{error}</Alert>}
 
-          <TextField
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-            fullWidth
-          />
-          <TextField
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-            fullWidth
-          />
+          {/* Email / Password form */}
+          <Box component="form" onSubmit={handleSubmit}>
+            <Stack spacing={2.5}>
+              <TextField
+                id="login-email"
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+                fullWidth
+              />
+              <TextField
+                id="login-password"
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                fullWidth
+              />
 
-          <Button type="submit" variant="contained" size="large" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
-          </Button>
+              <Button
+                id="login-submit-btn"
+                type="submit"
+                variant="contained"
+                size="large"
+                disabled={loading}
+                fullWidth
+                sx={{
+                  bgcolor: colors.academicBlue,
+                  color: colors.white,
+                  fontWeight: 600,
+                  '&:hover': { bgcolor: colors.midnightBlue },
+                }}
+              >
+                {loading ? 'Signing in…' : 'Sign In'}
+              </Button>
+            </Stack>
+          </Box>
         </Stack>
       </Paper>
     </Box>

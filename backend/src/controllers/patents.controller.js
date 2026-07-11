@@ -1,7 +1,7 @@
 /**
  * Patents Controller
  *
- * Backed by Supabase Postgres (config/supabase.js) — not MySQL.
+ * Backed by Supabase Postgres via the unified pool (config/db.js).
  * Uses $1/$2/... parameterized query syntax (pg driver).
  *
  * RBAC:
@@ -15,7 +15,7 @@
  *   grant_date, patent_office, category, description, department,
  *   document_path, owner_user_id, created_at, updated_at
  */
-const { getSupabasePool } = require('../config/supabase');
+const pool = require('../config/db');
 const { sendSuccess, sendFailure } = require('../utils/response');
 
 const VALID_STATUSES = ['Filed', 'Published', 'Granted'];
@@ -23,7 +23,6 @@ const VALID_STATUSES = ['Filed', 'Published', 'Granted'];
 // ─── CREATE ────────────────────────────────────────────────────────────────────
 const createPatent = async (req, res, next) => {
   try {
-    const pool = getSupabasePool();
     const ownerUserId = req.user.user_id ?? req.user.id ?? null;
 
     const {
@@ -52,7 +51,7 @@ const createPatent = async (req, res, next) => {
       });
     }
 
-    const { rows } = await pool.query(
+    const result = await pool.query(
       `INSERT INTO patents (
          title, status, number, inventors, filing_date, publication_date,
          grant_date, patent_office, category, description, department,
@@ -73,66 +72,63 @@ const createPatent = async (req, res, next) => {
         department || null,
         document_path || null,
         ownerUserId,
-      ]
+      ],
     );
 
     return sendSuccess(res, {
       statusCode: 201,
       message: 'Patent created successfully.',
-      data: rows[0],
+      data: result.rows[0],
     });
   } catch (error) {
-    return next(error);
+    console.error("Database Error:", error);
+    return sendFailure(res, { statusCode: 500, message: "Internal Server Error: Failed to process patent operation." });
   }
 };
 
 // ─── GET ALL (RBAC-scoped) ─────────────────────────────────────────────────────
 const getPatents = async (req, res, next) => {
   try {
-    const pool = getSupabasePool();
     const isAdmin = req.user?.role === 'admin';
     const ownerUserId = req.user?.user_id ?? req.user?.id ?? null;
 
-    let queryText;
-    let queryParams;
-
+    let result;
     if (isAdmin) {
-      queryText = `SELECT * FROM patents ORDER BY created_at DESC`;
-      queryParams = [];
+      result = await pool.query(`SELECT * FROM patents ORDER BY created_at DESC`);
     } else {
-      queryText = `SELECT * FROM patents WHERE owner_user_id = $1 ORDER BY created_at DESC`;
-      queryParams = [ownerUserId];
+      result = await pool.query(
+        `SELECT * FROM patents WHERE owner_user_id = $1 ORDER BY created_at DESC`,
+        [ownerUserId],
+      );
     }
-
-    const { rows } = await pool.query(queryText, queryParams);
 
     return sendSuccess(res, {
       message: 'Patents retrieved successfully.',
-      data: rows,
+      data: result.rows,
     });
   } catch (error) {
-    return next(error);
+    console.error("Database Error:", error);
+    return sendFailure(res, { statusCode: 500, message: "Internal Server Error: Failed to process patent operation." });
   }
 };
 
 // ─── GET BY ID (RBAC-scoped) ───────────────────────────────────────────────────
 const getPatentById = async (req, res, next) => {
   try {
-    const pool = getSupabasePool();
     const { id } = req.params;
     const isAdmin = req.user?.role === 'admin';
     const ownerUserId = req.user?.user_id ?? req.user?.id ?? null;
 
-    const { rows } = await pool.query(
+    const result = await pool.query(
       'SELECT * FROM patents WHERE patent_id = $1',
-      [id]
+      [id],
     );
 
-    if (rows.length === 0) {
+    if (result.rows.length === 0) {
       return sendFailure(res, { statusCode: 404, message: 'Patent not found.' });
     }
 
-    const patent = rows[0];
+    const patent = result.rows[0];
 
     if (!isAdmin && String(patent.owner_user_id) !== String(ownerUserId)) {
       return sendFailure(res, {
@@ -146,29 +142,29 @@ const getPatentById = async (req, res, next) => {
       data: patent,
     });
   } catch (error) {
-    return next(error);
+    console.error("Database Error:", error);
+    return sendFailure(res, { statusCode: 500, message: "Internal Server Error: Failed to process patent operation." });
   }
 };
 
 // ─── UPDATE (RBAC-scoped) ──────────────────────────────────────────────────────
 const updatePatent = async (req, res, next) => {
   try {
-    const pool = getSupabasePool();
     const { id } = req.params;
     const isAdmin = req.user?.role === 'admin';
     const ownerUserId = req.user?.user_id ?? req.user?.id ?? null;
 
     // Fetch existing patent first
-    const { rows: existing } = await pool.query(
+    const existing = await pool.query(
       'SELECT * FROM patents WHERE patent_id = $1',
-      [id]
+      [id],
     );
 
-    if (existing.length === 0) {
+    if (existing.rows.length === 0) {
       return sendFailure(res, { statusCode: 404, message: 'Patent not found.' });
     }
 
-    const patent = existing[0];
+    const patent = existing.rows[0];
 
     if (!isAdmin && String(patent.owner_user_id) !== String(ownerUserId)) {
       return sendFailure(res, {
@@ -199,21 +195,21 @@ const updatePatent = async (req, res, next) => {
       });
     }
 
-    const { rows: updated } = await pool.query(
+    const result = await pool.query(
       `UPDATE patents SET
-         title           = COALESCE($1,  title),
-         status          = COALESCE($2,  status),
-         number          = COALESCE($3,  number),
-         inventors       = COALESCE($4,  inventors),
-         filing_date     = COALESCE($5,  filing_date),
-         publication_date= COALESCE($6,  publication_date),
-         grant_date      = COALESCE($7,  grant_date),
-         patent_office   = COALESCE($8,  patent_office),
-         category        = COALESCE($9,  category),
-         description     = COALESCE($10, description),
-         department      = COALESCE($11, department),
-         document_path   = COALESCE($12, document_path),
-         updated_at      = NOW()
+         title            = COALESCE($1,  title),
+         status           = COALESCE($2,  status),
+         number           = COALESCE($3,  number),
+         inventors        = COALESCE($4,  inventors),
+         filing_date      = COALESCE($5,  filing_date),
+         publication_date = COALESCE($6,  publication_date),
+         grant_date       = COALESCE($7,  grant_date),
+         patent_office    = COALESCE($8,  patent_office),
+         category         = COALESCE($9,  category),
+         description      = COALESCE($10, description),
+         department       = COALESCE($11, department),
+         document_path    = COALESCE($12, document_path),
+         updated_at       = NOW()
        WHERE patent_id = $13
        RETURNING *`,
       [
@@ -230,36 +226,36 @@ const updatePatent = async (req, res, next) => {
         department || null,
         document_path || null,
         id,
-      ]
+      ],
     );
 
     return sendSuccess(res, {
       message: 'Patent updated successfully.',
-      data: updated[0],
+      data: result.rows[0],
     });
   } catch (error) {
-    return next(error);
+    console.error("Database Error:", error);
+    return sendFailure(res, { statusCode: 500, message: "Internal Server Error: Failed to process patent operation." });
   }
 };
 
 // ─── DELETE (RBAC-scoped) ──────────────────────────────────────────────────────
 const deletePatent = async (req, res, next) => {
   try {
-    const pool = getSupabasePool();
     const { id } = req.params;
     const isAdmin = req.user?.role === 'admin';
     const ownerUserId = req.user?.user_id ?? req.user?.id ?? null;
 
-    const { rows: existing } = await pool.query(
+    const existing = await pool.query(
       'SELECT * FROM patents WHERE patent_id = $1',
-      [id]
+      [id],
     );
 
-    if (existing.length === 0) {
+    if (existing.rows.length === 0) {
       return sendFailure(res, { statusCode: 404, message: 'Patent not found.' });
     }
 
-    const patent = existing[0];
+    const patent = existing.rows[0];
 
     if (!isAdmin && String(patent.owner_user_id) !== String(ownerUserId)) {
       return sendFailure(res, {
@@ -272,10 +268,11 @@ const deletePatent = async (req, res, next) => {
 
     return sendSuccess(res, {
       message: 'Patent deleted successfully.',
-      data: { patent_id: Number(id) },
+      data: null,
     });
   } catch (error) {
-    return next(error);
+    console.error("Database Error:", error);
+    return sendFailure(res, { statusCode: 500, message: "Internal Server Error: Failed to process patent operation." });
   }
 };
 

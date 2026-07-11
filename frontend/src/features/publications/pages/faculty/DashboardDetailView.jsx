@@ -972,7 +972,7 @@ const DashboardDetailView = ({
                 {/* Content grid */}
                 <Grid container spacing={3}>
                   {/* Left column */}
-                  <Grid item xs={12} lg={7}>
+                  <Grid size={{ xs: 12, lg: 7 }}  >
                     <Stack spacing={3}>
                       {/* Summary */}
                       <Box
@@ -1393,7 +1393,7 @@ const DashboardDetailView = ({
                   </Grid>
 
                   {/* Right column: Collaborators */}
-                  <Grid item xs={12} lg={5}>
+                  <Grid size={{ xs: 12, lg: 5 }}  >
                     <Box
                       sx={{
                         borderRadius: "16px",

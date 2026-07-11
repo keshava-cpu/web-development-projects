@@ -72,10 +72,10 @@ const TopNavbar = () => {
     [facultyProfile.displayName],
   );
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
     setAnchorEl(null);
-    navigate("/login");
+    await logout(); // clears localStorage + calls POST /api/auth/logout (cookie clear)
+    navigate("/login", { replace: true });
   };
 
   return (
