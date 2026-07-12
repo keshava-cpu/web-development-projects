@@ -123,7 +123,7 @@ export default function AdminEntryDetail({ entries, setEntries, userEmail, addEn
 
       <Grid container spacing={3}>
         {/* Main column */}
-        <Grid item xs={12} xl={7}>
+        <Grid size={{ xs: 12, xl: 7 }}  >
           <Stack spacing={3}>
             {/* Summary card */}
             <Card sx={{ borderRadius: "24px", p: 3 }}>
@@ -138,7 +138,7 @@ export default function AdminEntryDetail({ entries, setEntries, userEmail, addEn
                 {entry.summary || "No summary is available for this entry."}
               </Typography>
               <Grid container spacing={2} sx={{ mt: 2 }}>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}  >
                   <Box sx={{ borderRadius: "24px", bgcolor: "#F1F5F9", p: 2 }}>
                     <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: "0.28em", color: "text.secondary" }}>Contributors</Typography>
                     <Typography variant="body2" sx={{ mt: 1, color: "#1F2933" }}>
@@ -146,7 +146,7 @@ export default function AdminEntryDetail({ entries, setEntries, userEmail, addEn
                     </Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}  >
                   <Box sx={{ borderRadius: "24px", bgcolor: "#F1F5F9", p: 2 }}>
                     <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: "0.28em", color: "text.secondary" }}>Last update</Typography>
                     <Typography variant="body2" sx={{ mt: 1, color: "#1F2933" }}>{entry.updatedAt}</Typography>
@@ -166,7 +166,7 @@ export default function AdminEntryDetail({ entries, setEntries, userEmail, addEn
               </Box>
               <Grid container spacing={1.5}>
                 {(entry.status === "in_review" || entry.status === "changes_requested") && (
-                  <Grid item xs={12} sm={4}>
+                  <Grid size={{ xs: 12, sm: 4 }}  >
                     <Button
                       fullWidth
                       disabled={loadingStatus !== null}
@@ -179,7 +179,7 @@ export default function AdminEntryDetail({ entries, setEntries, userEmail, addEn
                   </Grid>
                 )}
                 {entry.status === "in_review" && (
-                  <Grid item xs={12} sm={4}>
+                  <Grid size={{ xs: 12, sm: 4 }}  >
                     <Button
                       fullWidth
                       disabled={loadingStatus !== null}
@@ -192,7 +192,7 @@ export default function AdminEntryDetail({ entries, setEntries, userEmail, addEn
                   </Grid>
                 )}
                 {entry.status === "approved_for_publication" && (
-                  <Grid item xs={12} sm={4}>
+                  <Grid size={{ xs: 12, sm: 4 }}  >
                     <Button
                       fullWidth
                       disabled={loadingStatus !== null}
@@ -230,7 +230,7 @@ export default function AdminEntryDetail({ entries, setEntries, userEmail, addEn
         </Grid>
 
         {/* Aside column */}
-        <Grid item xs={12} xl={5}>
+        <Grid size={{ xs: 12, xl: 5 }}  >
           <Stack spacing={3}>
             <Card sx={{ borderRadius: "24px", p: 3 }}>
               <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: "0.3em", color: "text.secondary" }}>

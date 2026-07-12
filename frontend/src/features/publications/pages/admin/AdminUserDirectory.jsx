@@ -130,7 +130,7 @@ export default function AdminUserDirectory({ users }) {
       {/* Summary stats */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {summaryStats.map((s) => (
-          <Grid item xs={12} sm={4} key={s.label}>
+          <Grid size={{ xs: 12, sm: 4 }}   key={s.label}>
             <Card sx={{ borderRadius: "24px", p: 2.5, display: "flex", alignItems: "center", gap: 2 }}>
               <Box sx={{ width: 48, height: 48, borderRadius: "14px", bgcolor: "#F1F5F9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 {s.icon}
@@ -249,7 +249,7 @@ export default function AdminUserDirectory({ users }) {
           {filtered.length > 0 ? (
             <Grid container spacing={2}>
               {filtered.map((user) => (
-                <Grid item xs={12} sm={6} lg={6} key={user.email}>
+                <Grid size={{ xs: 12, sm: 6, lg: 6 }}    key={user.email}>
                   <UserCard user={user} />
                 </Grid>
               ))}

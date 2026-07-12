@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { createProject, fetchProjects } from '../api/projects';
+import {
+  createProject,
+  deleteProject,
+  fetchProjects,
+  updateProject,
+} from '../api/projects';
 
 export const useProjects = () => {
   const [projects, setProjects] = useState([]);
@@ -21,25 +26,26 @@ export const useProjects = () => {
     }
   }, []);
 
+  /**
+   * addProject
+   * Payload: { agency, amount, pi, co_pi, status }
+   * Note: `title` and file upload removed — not in Supabase spec schema.
+   */
   const addProject = useCallback(
     async (formValues) => {
       setSubmitting(true);
       setError(null);
 
-      const formData = new FormData();
-      formData.append('title', formValues.title);
-      formData.append('agency', formValues.agency);
-      formData.append('amount', String(formValues.amount || 0));
-      formData.append('pi', formValues.pi);
-      formData.append('copi', formValues.copi || '');
-      formData.append('status', formValues.status || 'Pending');
-
-      if (formValues.utilizationReport) {
-        formData.append('utilization_report', formValues.utilizationReport);
-      }
+      const payload = {
+        agency: formValues.agency,
+        amount: formValues.amount || 0,
+        pi: formValues.pi,
+        co_pi: formValues.copi || formValues.co_pi || '',
+        status: formValues.status || 'Pending',
+      };
 
       try {
-        const response = await createProject(formData);
+        const response = await createProject(payload);
         await loadProjects();
         return response;
       } catch (err) {
@@ -50,7 +56,55 @@ export const useProjects = () => {
         setSubmitting(false);
       }
     },
-    [loadProjects]
+    [loadProjects],
+  );
+
+  const editProject = useCallback(
+    async (id, formValues) => {
+      setSubmitting(true);
+      setError(null);
+
+      const payload = {
+        agency: formValues.agency,
+        amount: formValues.amount,
+        pi: formValues.pi,
+        co_pi: formValues.copi || formValues.co_pi,
+        status: formValues.status,
+      };
+
+      try {
+        const response = await updateProject(id, payload);
+        await loadProjects();
+        return response;
+      } catch (err) {
+        const message = err.response?.data?.message || 'Failed to update project.';
+        setError(message);
+        throw new Error(message);
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [loadProjects],
+  );
+
+  const removeProject = useCallback(
+    async (id) => {
+      setSubmitting(true);
+      setError(null);
+
+      try {
+        const response = await deleteProject(id);
+        await loadProjects();
+        return response;
+      } catch (err) {
+        const message = err.response?.data?.message || 'Failed to delete project.';
+        setError(message);
+        throw new Error(message);
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [loadProjects],
   );
 
   useEffect(() => {
@@ -64,5 +118,7 @@ export const useProjects = () => {
     error,
     loadProjects,
     addProject,
+    editProject,
+    removeProject,
   };
 };

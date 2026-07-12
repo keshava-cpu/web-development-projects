@@ -1,14 +1,26 @@
-require("dotenv").config();
+/**
+ * Unified PostgreSQL (Supabase) connection pool.
+ *
+ * Replaces the old mysql2 pool and the now-deleted config/supabase.js.
+ * All controllers import this single pool instance.
+ *
+ * DATABASE_URL must be set in .env, e.g.:
+ *   DATABASE_URL=postgresql://user:p%40ss@host:port/dbname
+ * (Special characters in the password must be URL-encoded.)
+ */
 
-const pool = require("mysql2/promise").createPool({
-  host: process.env.DB_HOST || "localhost",
-  port: Number(process.env.DB_PORT) || 3306,
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "rnd_management_db",
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    require: true,
+    rejectUnauthorized: false,
+  },
+});
+
+pool.on('error', (err) => {
+  console.error('[pg pool] Unexpected client error:', err.message);
 });
 
 module.exports = pool;

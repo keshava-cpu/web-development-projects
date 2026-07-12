@@ -232,7 +232,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
 
           <Grid container spacing={2}>
             {/* Title — full width */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }} >
               <TextField
                 label="Patent Title"
                 value={form.title}
@@ -243,7 +243,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
             </Grid>
 
             {/* Status + Patent Office */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}  >
               <TextField
                 select
                 label="Status"
@@ -257,7 +257,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
                 ))}
               </TextField>
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}  >
               <TextField
                 select
                 label="Patent Office"
@@ -273,7 +273,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
             </Grid>
 
             {/* Patent number + category */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}  >
               <TextField
                 label="Patent Number"
                 value={form.number}
@@ -282,7 +282,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
                 placeholder="e.g. IN202041012345"
               />
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}  >
               <TextField
                 label="Category"
                 value={form.category}
@@ -293,7 +293,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
             </Grid>
 
             {/* Inventors + Department */}
-            <Grid item xs={12} md={8}>
+            <Grid size={{ xs: 12, md: 8 }}  >
               <TextField
                 label="Inventors"
                 value={form.inventors}
@@ -302,7 +302,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
                 placeholder="Comma-separated names"
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}  >
               <TextField
                 label="Department"
                 value={form.department}
@@ -313,7 +313,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
             </Grid>
 
             {/* Dates */}
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}  >
               <TextField
                 label="Filing Date"
                 type="date"
@@ -323,7 +323,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}  >
               <TextField
                 label="Publication Date"
                 type="date"
@@ -333,7 +333,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}  >
               <TextField
                 label="Grant Date"
                 type="date"
@@ -345,7 +345,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
             </Grid>
 
             {/* Document path */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }} >
               <TextField
                 label="Document Path / URL"
                 value={form.document_path}
@@ -356,7 +356,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
             </Grid>
 
             {/* Description */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }} >
               <TextField
                 label="Description"
                 value={form.description}
@@ -578,7 +578,7 @@ const PatentsPage = () => {
             const palette = STATUS_COLORS[status];
             const group = grouped[status];
             return (
-              <Grid item xs={12} md={4} key={status}>
+              <Grid size={{ xs: 12, md: 4 }}   key={status}>
                 {/* Column header */}
                 <Stack
                   direction="row"

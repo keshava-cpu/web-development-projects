@@ -261,7 +261,7 @@ export default function AdminReviewQueue({ entries, setEntries, userEmail, addEn
               {/* Action buttons */}
               <Grid container spacing={1.5} sx={{ mt: 2 }}>
                 {(entry.status === "in_review" || entry.status === "changes_requested") && (
-                  <Grid item xs={12} sm={4}>
+                  <Grid size={{ xs: 12, sm: 4 }}  >
                     <Button
                       fullWidth
                       disabled={loadingEntry === entry.id}
@@ -274,7 +274,7 @@ export default function AdminReviewQueue({ entries, setEntries, userEmail, addEn
                   </Grid>
                 )}
                 {entry.status === "in_review" && (
-                  <Grid item xs={12} sm={4}>
+                  <Grid size={{ xs: 12, sm: 4 }}  >
                     <Button
                       fullWidth
                       disabled={loadingEntry === entry.id}
@@ -287,7 +287,7 @@ export default function AdminReviewQueue({ entries, setEntries, userEmail, addEn
                   </Grid>
                 )}
                 {entry.status === "approved_for_publication" && (
-                  <Grid item xs={12} sm={4}>
+                  <Grid size={{ xs: 12, sm: 4 }}  >
                     <Button
                       fullWidth
                       disabled={loadingEntry === entry.id}

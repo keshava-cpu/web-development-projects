@@ -1,5 +1,5 @@
 const express = require('express');
-const protect = require('../middleware/protect');
+const protect = require('../middleware/cookieAuth');
 const patentsController = require('../controllers/patents.controller');
 
 const router = express.Router();

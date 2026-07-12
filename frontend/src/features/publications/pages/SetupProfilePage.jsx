@@ -112,8 +112,8 @@ export default function SetupProfilePage({
         <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           {/* Name + Email */}
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.75, display: "flex", alignItems: "center", gap: 1 }}>
+            <Grid size={{ xs: 12, sm: 6 }}  >
+              <Typography component="div" variant="body2" sx={{ fontWeight: 600, mb: 0.75, display: "flex", alignItems: "center", gap: 1 }}>
                 Full name
                 <Chip label="Required" size="small" sx={{ bgcolor: "#fef3c7", color: "#92400e", fontWeight: 700, fontSize: "0.625rem", letterSpacing: "0.12em" }} />
               </Typography>
@@ -126,7 +126,7 @@ export default function SetupProfilePage({
                 sx={{ "& .MuiOutlinedInput-root": { borderRadius: "16px" } }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}  >
               <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.75 }}>Email address</Typography>
               <TextField
                 fullWidth
@@ -140,7 +140,7 @@ export default function SetupProfilePage({
 
           {/* Role + Department + Title */}
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}  >
               <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.75 }}>Role</Typography>
               <TextField
                 fullWidth
@@ -150,8 +150,8 @@ export default function SetupProfilePage({
                 sx={{ "& .MuiOutlinedInput-root": { borderRadius: "16px", bgcolor: "#F1F5F9" } }}
               />
             </Grid>
-            <Grid item xs={12} sm={4}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.75, display: "flex", alignItems: "center", gap: 1 }}>
+            <Grid size={{ xs: 12, sm: 4 }}  >
+              <Typography component="div" variant="body2" sx={{ fontWeight: 600, mb: 0.75, display: "flex", alignItems: "center", gap: 1 }}>
                 Department
                 <Chip label="Required" size="small" sx={{ bgcolor: "#fef3c7", color: "#92400e", fontWeight: 700, fontSize: "0.625rem", letterSpacing: "0.12em" }} />
               </Typography>
@@ -167,8 +167,8 @@ export default function SetupProfilePage({
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={4}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.75, display: "flex", alignItems: "center", gap: 1 }}>
+            <Grid size={{ xs: 12, sm: 4 }}  >
+              <Typography component="div" variant="body2" sx={{ fontWeight: 600, mb: 0.75, display: "flex", alignItems: "center", gap: 1 }}>
                 Title
                 <Chip label="Required" size="small" sx={{ bgcolor: "#fef3c7", color: "#92400e", fontWeight: 700, fontSize: "0.625rem", letterSpacing: "0.12em" }} />
               </Typography>

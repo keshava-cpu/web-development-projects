@@ -42,7 +42,7 @@ export default function AdminDashboard({ entries, users }) {
     <Box component="section">
       <Grid container spacing={3}>
         {/* Left panel */}
-        <Grid item xs={12} xl={8}>
+        <Grid size={{ xs: 12, xl: 8 }}  >
           <Card sx={{ borderRadius: "32px", p: { xs: 3, sm: 5 }, boxShadow: "0 10px 30px rgba(11,45,77,0.08)" }}>
             <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: "0.3em", color: "text.secondary" }}>
               Admin workspace
@@ -56,7 +56,7 @@ export default function AdminDashboard({ entries, users }) {
 
             <Grid container spacing={2} sx={{ mt: 4 }}>
               {quickLinks.map((link) => (
-                <Grid item xs={12} sm={6} key={link.to}>
+                <Grid size={{ xs: 12, sm: 6 }}   key={link.to}>
                   <Card
                     component={Link}
                     to={link.to}
@@ -84,7 +84,7 @@ export default function AdminDashboard({ entries, users }) {
                 </Grid>
               ))}
 
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}  >
                 <Box sx={{ borderRadius: "24px", bgcolor: "#F1F5F9", border: "1px solid #D9E2EC", p: 3 }}>
                   <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: "0.3em", color: "text.secondary" }}>
                     Admin actions
@@ -105,7 +105,7 @@ export default function AdminDashboard({ entries, users }) {
         </Grid>
 
         {/* Right panel */}
-        <Grid item xs={12} xl={4}>
+        <Grid size={{ xs: 12, xl: 4 }}  >
           <Card
             sx={{
               borderRadius: "32px",

@@ -1,47 +1,24 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const pool = require("../config/db");
-const jwtConfig = require("../config/jwt");
-const { sendSuccess, sendFailure } = require("../utils/response");
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const pool = require('../config/db');
+const jwtConfig = require('../config/jwt');
+const { sendSuccess, sendFailure } = require('../utils/response');
 
+/**
+ * POST /api/register
+ * Currently disabled.
+ */
 const register = async (req, res, next) => {
-  try {
-    const { name, email, password, role } = req.body;
-
-    if (!name || !email || !password || !role) {
-      return sendFailure(res, {
-        statusCode: 400,
-        message: "Name, email, password, and role are required.",
-      });
-    }
-
-    const [existing] = await pool.query(
-      "SELECT user_id FROM users WHERE email = ?",
-      [email],
-    );
-    if (existing.length > 0) {
-      return sendFailure(res, {
-        statusCode: 409,
-        message: "A user with this email already exists.",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const [result] = await pool.query(
-      "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
-      [name, email, hashedPassword, role],
-    );
-
-    return sendSuccess(res, {
-      statusCode: 201,
-      message: "User registered successfully.",
-      data: { user_id: result.insertId, name, email, role },
-    });
-  } catch (error) {
-    return next(error);
-  }
+  return sendFailure(res, {
+    statusCode: 400,
+    message: 'Password registration is disabled. Please contact an administrator.',
+  });
 };
 
+/**
+ * POST /api/login
+ * Standard email/password login route.
+ */
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -49,69 +26,58 @@ const login = async (req, res, next) => {
     if (!email || !password) {
       return sendFailure(res, {
         statusCode: 400,
-        message: "Email and password are required.",
+        message: 'Email and password are required',
       });
     }
 
-    if (email === "24071a6640@vnrvjiet.in" && password === "vnrvjiet") {
-      const token = jwt.sign(
-        { user_id: 9999, email: "24071a6640@vnrvjiet.in", role: "admin" },
-        jwtConfig.secret,
-        { expiresIn: jwtConfig.expiresIn },
-      );
-
-      return sendSuccess(res, {
-        message: "Login successful.",
-        data: {
-          token,
-          user: {
-            user_id: 9999,
-            name: "Bypass User",
-            email: "24071a6640@vnrvjiet.in",
-            role: "admin",
-          },
-        },
-      });
-    }
-
-    const [rows] = await pool.query(
-      "SELECT user_id, name, email, password, role FROM users WHERE email = ?",
+    const result = await pool.query(
+      `SELECT u.user_id, u.name, u.email, u.role, c.password_hash
+       FROM users u
+       JOIN credentials c ON u.user_id = c.user_id
+       WHERE u.email = $1`,
       [email],
     );
 
-    if (rows.length === 0) {
+    // Dummy hash comparison to prevent timing side-channels
+    const dummyHash = '$2a$10$abcdefghijklmnopqrstuv'; // Valid bcrypt prefix length
+
+    if (result.rows.length === 0) {
+      // Simulate bcrypt comparison time
+      await bcrypt.compare(password, dummyHash);
       return sendFailure(res, {
         statusCode: 401,
-        message: "Invalid email or password.",
+        message: 'Incorrect email or password',
       });
     }
 
-    const user = rows[0];
-    const isMatch = await bcrypt.compare(password, user.password);
+    const user = result.rows[0];
+    const passwordMatches = await bcrypt.compare(password, user.password_hash);
 
-    if (!isMatch) {
+    if (!passwordMatches) {
       return sendFailure(res, {
         statusCode: 401,
-        message: "Invalid email or password.",
+        message: 'Incorrect email or password',
       });
     }
 
     const token = jwt.sign(
       { user_id: user.user_id, email: user.email, role: user.role },
-      jwtConfig.secret,
-      { expiresIn: jwtConfig.expiresIn },
+      process.env.JWT_SECRET || 'change_me_to_a_secure_random_string',
+      { expiresIn: '7d' },
     );
 
+    res.cookie('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     return sendSuccess(res, {
-      message: "Login successful.",
+      statusCode: 200,
+      message: 'Login successful',
       data: {
-        token,
-        user: {
-          user_id: user.user_id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
+        user: { user_id: user.user_id, name: user.name, email: user.email, role: user.role },
       },
     });
   } catch (error) {

@@ -95,7 +95,7 @@ export default function AdminPublications({ entries }) {
       {/* Stats grid */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {statCards.map((s) => (
-          <Grid item xs={6} lg={3} key={s.label}>
+          <Grid size={{ xs: 6, lg: 3 }}   key={s.label}>
             <Card sx={{ borderRadius: "24px", p: 3 }}>
               <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: "0.3em", color: "text.secondary", fontWeight: 600 }}>
                 {s.label}

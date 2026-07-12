@@ -6,7 +6,7 @@
  * These are separate from backend's existing /api/publications (MySQL-backed).
  * These routes use the in-memory apiEntries array from server/.
  */
-const protect = require("../../middleware/protect");
+const protect = require("../../middleware/cookieAuth");
 const express = require("express");
 const { apiEntries } = require("../../data/keshavaData");
 
