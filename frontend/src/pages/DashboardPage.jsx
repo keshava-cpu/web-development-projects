@@ -6,6 +6,7 @@ import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import BalanceOutlinedIcon from "@mui/icons-material/BalanceOutlined";
 import { useNavigate } from "react-router-dom";
 import { colors } from "../theme/colors";
+import { useAuth } from "../context/AuthContext";
 
 const moduleCards = [
   {
@@ -13,7 +14,7 @@ const moduleCards = [
     description:
       "Monitor agency grants, utilization reports, and investigator assignments.",
     icon: AssignmentOutlinedIcon,
-    path: "/projects",
+    path: () => "/projects",
     btnLabel: "Open Projects",
     btnId: "dashboard-projects-btn",
   },
@@ -22,7 +23,10 @@ const moduleCards = [
     description:
       "Submit, review, and track academic publications through the full editorial workflow.",
     icon: ScienceOutlinedIcon,
-    path: "/publications-tracker/dashboard",
+    path: (isAdmin) =>
+      isAdmin
+        ? "/publications-tracker/admin"
+        : "/publications-tracker/dashboard",
     btnLabel: "Open Publications",
     btnId: "dashboard-publications-btn",
   },
@@ -31,7 +35,7 @@ const moduleCards = [
     description:
       "Record and manage Filed, Published, and Granted patents with full RBAC control.",
     icon: BalanceOutlinedIcon,
-    path: "/patents",
+    path: () => "/patents",
     btnLabel: "Open Patents",
     btnId: "dashboard-patents-btn",
   },
@@ -40,7 +44,7 @@ const moduleCards = [
     description:
       "Review aggregate metrics across the R&D management ecosystem.",
     icon: TrendingUpOutlinedIcon,
-    path: "/reports",
+    path: () => "/reports",
     btnLabel: "View Reports",
     btnId: "dashboard-reports-btn",
   },
@@ -48,6 +52,8 @@ const moduleCards = [
 
 const DashboardPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role?.toLowerCase() === "admin";
 
   return (
     <Stack spacing={3}>
@@ -71,6 +77,7 @@ const DashboardPage = () => {
       <Grid container spacing={2.5}>
         {moduleCards.map((card) => {
           const Icon = card.icon;
+          const resolvedPath = card.path(isAdmin);
           return (
             <Grid key={card.title} size={{ xs: 12, md: 6, lg: 3 }}>
               <Paper
@@ -123,7 +130,7 @@ const DashboardPage = () => {
                     variant={card.highlight ? "contained" : "outlined"}
                     size="small"
                     fullWidth
-                    onClick={() => navigate(card.path)}
+                    onClick={() => navigate(resolvedPath)}
                     sx={
                       card.highlight
                         ? {
