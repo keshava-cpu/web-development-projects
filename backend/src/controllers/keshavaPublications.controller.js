@@ -4,11 +4,11 @@
  * Backed by Supabase Postgres via the unified pool (config/db.js).
  * Matches the frontend publications module schema (/frontend/src/features/publications).
  */
-const pool = require('../config/db');
+const pool = require("../config/db");
 
 const safeJsonParse = (val, fallback) => {
   if (!val) return fallback;
-  if (typeof val === 'object') return val;
+  if (typeof val === "object") return val;
   try {
     return JSON.parse(val);
   } catch {
@@ -27,10 +27,10 @@ const mapRowToEntry = (row) => {
     department: row.department,
     owner: row.owner,
     contributors: safeJsonParse(row.contributors, []),
-    status: row.status || 'draft',
-    summary: row.summary || '',
-    latestFile: row.latest_file || 'draft.pdf',
-    updatedAt: row.updated_at || '',
+    status: row.status || "draft",
+    summary: row.summary || "",
+    latestFile: row.latest_file || "draft.pdf",
+    updatedAt: row.updated_at || "",
     reviewRequestedAt: row.review_requested_at || null,
     metrics: safeJsonParse(row.metrics, { messageCount: 0, impactPoints: 0 }),
     versions: safeJsonParse(row.versions, []),
@@ -46,11 +46,13 @@ const mapRowToEntry = (row) => {
  */
 const getPublications = async (req, res, next) => {
   try {
-    const result = await pool.query('SELECT * FROM publications ORDER BY created_at DESC');
+    const result = await pool.query(
+      "SELECT * FROM publications ORDER BY created_at DESC",
+    );
     const items = result.rows.map(mapRowToEntry);
     return res.json({ items });
   } catch (error) {
-    console.error('Error fetching publications:', error);
+    console.error("Error fetching publications:", error);
     return next(error);
   }
 };
@@ -60,8 +62,10 @@ const getPublications = async (req, res, next) => {
  * Creates a new publication entry. Requires authenticated user.
  */
 const createPublication = async (req, res, next) => {
+  console.log("inside create pub");
   if (!req.user) {
-    return res.status(401).json({ error: 'not_authenticated' });
+    console.log("user not auth", req.user);
+    return res.status(401).json({ error: "not_authenticated" });
   }
 
   const {
@@ -82,7 +86,7 @@ const createPublication = async (req, res, next) => {
   } = req.body;
 
   if (!id || !title || !department || !owner) {
-    return res.status(400).json({ error: 'missing_required_fields' });
+    return res.status(400).json({ error: "missing_required_fields" });
   }
 
   try {
@@ -92,9 +96,9 @@ const createPublication = async (req, res, next) => {
       department,
       owner,
       contributors: contributors || [owner],
-      status: status || 'draft',
-      summary: summary || '',
-      latestFile: latestFile || 'draft.pdf',
+      status: status || "draft",
+      summary: summary || "",
+      latestFile: latestFile || "draft.pdf",
       updatedAt: updatedAt || new Date().toISOString(),
       metrics: metrics || { messageCount: 0, impactPoints: 0 },
       versions: versions || [],
@@ -132,7 +136,7 @@ const createPublication = async (req, res, next) => {
     const item = mapRowToEntry(result.rows[0]);
     return res.json({ item });
   } catch (error) {
-    console.error('Error creating publication:', error);
+    console.error("Error creating publication:", error);
     return next(error);
   }
 };
@@ -143,7 +147,8 @@ const createPublication = async (req, res, next) => {
  */
 const updatePublicationStatus = async (req, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'not_authenticated' });
+    console.log("Not aithen");
+    return res.status(401).json({ error: "not_authenticated" });
   }
 
   const { id } = req.params;
@@ -151,23 +156,30 @@ const updatePublicationStatus = async (req, res, next) => {
   const timelineEvent = req.body?.timelineEvent;
 
   if (!nextStatus) {
-    return res.status(400).json({ error: 'publication_not_found_or_invalid_status' });
+    return res
+      .status(400)
+      .json({ error: "publication_not_found_or_invalid_status" });
   }
 
   try {
-    const checkResult = await pool.query('SELECT * FROM publications WHERE id = $1', [id]);
+    const checkResult = await pool.query(
+      "SELECT * FROM publications WHERE id = $1",
+      [id],
+    );
     if (checkResult.rows.length === 0) {
-      return res.status(400).json({ error: 'publication_not_found_or_invalid_status' });
+      return res
+        .status(400)
+        .json({ error: "publication_not_found_or_invalid_status" });
     }
 
     const row = checkResult.rows[0];
     let reviewRequestedAt = row.review_requested_at;
-    if (nextStatus === 'in_review') {
+    if (nextStatus === "in_review") {
       reviewRequestedAt = new Date().toLocaleString([], {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       });
     }
 
@@ -199,7 +211,7 @@ const updatePublicationStatus = async (req, res, next) => {
     const item = mapRowToEntry(updateResult.rows[0]);
     return res.json({ item });
   } catch (error) {
-    console.error('Error updating publication status:', error);
+    console.error("Error updating publication status:", error);
     return next(error);
   }
 };
@@ -210,15 +222,18 @@ const updatePublicationStatus = async (req, res, next) => {
  */
 const updatePublication = async (req, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'not_authenticated' });
+    return res.status(401).json({ error: "not_authenticated" });
   }
 
   const { id } = req.params;
 
   try {
-    const checkResult = await pool.query('SELECT * FROM publications WHERE id = $1', [id]);
+    const checkResult = await pool.query(
+      "SELECT * FROM publications WHERE id = $1",
+      [id],
+    );
     if (checkResult.rows.length === 0) {
-      return res.status(404).json({ error: 'publication_not_found' });
+      return res.status(404).json({ error: "publication_not_found" });
     }
 
     const row = checkResult.rows[0];
@@ -226,8 +241,8 @@ const updatePublication = async (req, res, next) => {
     // Check authorization: Only the owner is allowed to perform edits
     if (row.owner !== req.user.email) {
       return res.status(403).json({
-        error: 'unauthorized',
-        message: 'Only the entry owner can edit this publication',
+        error: "unauthorized",
+        message: "Only the entry owner can edit this publication",
       });
     }
 
@@ -243,10 +258,13 @@ const updatePublication = async (req, res, next) => {
     } = req.body;
 
     const nextTitle = title !== undefined ? title : row.title;
-    const nextDepartment = department !== undefined ? department : row.department;
+    const nextDepartment =
+      department !== undefined ? department : row.department;
     const nextSummary = summary !== undefined ? summary : row.summary;
-    const nextContributors = contributors !== undefined ? contributors : row.contributors;
-    const nextLatestFile = latestFile !== undefined ? latestFile : row.latest_file;
+    const nextContributors =
+      contributors !== undefined ? contributors : row.contributors;
+    const nextLatestFile =
+      latestFile !== undefined ? latestFile : row.latest_file;
     const nextMetrics = metrics !== undefined ? metrics : row.metrics;
     const updatedAt = new Date().toISOString();
 
@@ -292,7 +310,7 @@ const updatePublication = async (req, res, next) => {
     const item = mapRowToEntry(updateResult.rows[0]);
     return res.json({ item });
   } catch (error) {
-    console.error('Error updating publication:', error);
+    console.error("Error updating publication:", error);
     return next(error);
   }
 };
