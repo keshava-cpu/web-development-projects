@@ -16,7 +16,10 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import Box from "@mui/material/Box";
 
-import { PublicationsProvider, usePublications } from "./context/PublicationsContext";
+import {
+  PublicationsProvider,
+  usePublications,
+} from "./context/PublicationsContext";
 import AuthCallback from "./components/AuthCallback";
 import InvalidDomainPage from "./components/InvalidDomainPage";
 
@@ -50,6 +53,7 @@ function PublicationsRoutes() {
     selectedEntry,
     filteredEntries,
     entriesLoading,
+    setEntriesLoading,
     entryDraft,
     setEntryDraft,
     commitMessage,
@@ -135,7 +139,10 @@ function PublicationsRoutes() {
         <Route
           path="auth-callback"
           element={
-            <AuthCallback onLoginSuccess={handleSuccessfulLogin} token={token} />
+            <AuthCallback
+              onLoginSuccess={handleSuccessfulLogin}
+              token={token}
+            />
           }
         />
 
@@ -239,6 +246,7 @@ function PublicationsRoutes() {
                 isAdmin={isAdmin}
                 users={users}
                 loading={entriesLoading}
+                setLoading={setEntriesLoading}
               />
             }
           />

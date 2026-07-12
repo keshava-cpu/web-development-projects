@@ -38,7 +38,7 @@ import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutlined";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import Paper from "@mui/material/Paper";
-import { useAuth } from "../../../../context/AuthContext";
+// import { useAuth } from "../../../../context/AuthContext";
 import PublicationsDetailSkeleton from "../../../../components/skeletons/PublicationsDetailSkeleton";
 
 // Map legacy status class strings to MUI sx props
@@ -97,12 +97,13 @@ const DashboardDetailView = ({
   isAdmin,
   users,
   loading,
+  setLoading,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const returnToAdmin = location.state?.returnTo;
   const [sidebarStatusFilter, setSidebarStatusFilter] = useState("all");
-  const { token } = useAuth();
+  // const { token } = useAuth();
 
   const sidebarFiltered = useMemo(() => {
     if (sidebarStatusFilter === "all") return filteredEntries;
@@ -135,6 +136,7 @@ const DashboardDetailView = ({
     };
 
   async function handleStatusChange(nextStatus, kind, note) {
+    setLoading(true);
     const timelineEvent = {
       id: shortId(),
       kind,
@@ -151,7 +153,7 @@ const DashboardDetailView = ({
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token || localStorage.getItem("token")}`,
+            // Authorization: `Bearer ${token || localStorage.getItem("token")}`,
           },
           body: JSON.stringify({ status: nextStatus, timelineEvent }),
         },
@@ -165,6 +167,8 @@ const DashboardDetailView = ({
     } catch (err) {
       console.error(err);
       addEntryNotification("Error", `Failed: ${note}`);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -991,7 +995,7 @@ const DashboardDetailView = ({
                 {/* Content grid */}
                 <Grid container spacing={3}>
                   {/* Left column */}
-                  <Grid size={{ xs: 12, lg: 7 }}  >
+                  <Grid size={{ xs: 12, lg: 7 }}>
                     <Stack spacing={3}>
                       {/* Summary */}
                       <Box
@@ -1412,7 +1416,7 @@ const DashboardDetailView = ({
                   </Grid>
 
                   {/* Right column: Collaborators */}
-                  <Grid size={{ xs: 12, lg: 5 }}  >
+                  <Grid size={{ xs: 12, lg: 5 }}>
                     <Box
                       sx={{
                         borderRadius: "16px",

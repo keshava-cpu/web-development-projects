@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const { sendFailure } = require('../utils/response');
+const jwt = require("jsonwebtoken");
+const { sendFailure } = require("../utils/response");
 
 /**
  * Accepts either:
@@ -11,10 +11,13 @@ const { sendFailure } = require('../utils/response');
  */
 const cookieAuth = (req, res, next) => {
   // 1. Try the Authorization header (Bearer token sent by apiClient)
-  const authHeader = req.headers.authorization || '';
-  let token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const authHeader = req.headers.authorization || "";
+  let token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
 
   // 2. Fall back to the HTTP-only cookie
+  console.log("cookie:", req.cookies);
+  console.log("token: ", token);
+
   if (!token) {
     token = req.cookies?.auth_token || null;
   }
@@ -22,18 +25,22 @@ const cookieAuth = (req, res, next) => {
   if (!token) {
     return sendFailure(res, {
       statusCode: 401,
-      message: 'Authentication required. Please log in.',
+      message: "Authentication required. Please log in.",
     });
   }
 
   try {
-    const jwtSecret = process.env.JWT_SECRET || 'default-secret';
+    console.log("token: ", token);
+    const jwtSecret = process.env.JWT_SECRET || "default-secret";
+    console.log("JWT secret:", jwtSecret);
     req.user = jwt.verify(token, jwtSecret);
+    console.log("YAY!");
     return next();
   } catch (error) {
+    // console.log(error);
     return sendFailure(res, {
       statusCode: 401,
-      message: 'Invalid or expired session. Please log in again.',
+      message: "Invalid or expired session. Please log in again.",
     });
   }
 };
