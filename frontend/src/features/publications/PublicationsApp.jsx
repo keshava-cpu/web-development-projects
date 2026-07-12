@@ -49,6 +49,7 @@ function PublicationsRoutes() {
     selectedEntryId,
     selectedEntry,
     filteredEntries,
+    entriesLoading,
     entryDraft,
     setEntryDraft,
     commitMessage,
@@ -147,7 +148,7 @@ function PublicationsRoutes() {
             isKnownProfile ? (
               <FacultyRoute
                 {...sharedLayoutProps}
-                selectedEntryId={selectedEntryId}
+                selectedEntryId={selectedEntryId || filteredEntries[0]?.id}
                 facultyProfile={facultyProfile}
               />
             ) : (
@@ -165,6 +166,7 @@ function PublicationsRoutes() {
                 selectEntry={selectEntry}
                 statusClasses={statusClasses}
                 statusLabels={statusLabels}
+                loading={entriesLoading}
               />
             }
           />
@@ -236,6 +238,7 @@ function PublicationsRoutes() {
                 selectEntry={selectEntry}
                 isAdmin={isAdmin}
                 users={users}
+                loading={entriesLoading}
               />
             }
           />

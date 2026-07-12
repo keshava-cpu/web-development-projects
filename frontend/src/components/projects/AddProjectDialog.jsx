@@ -16,7 +16,6 @@ import PdfUploadField from './PdfUploadField';
 import { colors } from '../../theme/colors';
 
 const initialForm = {
-  title: '',
   agency: '',
   amount: '',
   pi: '',
@@ -46,8 +45,8 @@ const AddProjectDialog = ({ open, onClose, onSubmit, submitting, error }) => {
     event.preventDefault();
     setValidationError(null);
 
-    if (!form.title.trim() || !form.agency.trim() || !form.pi.trim()) {
-      setValidationError('Project Title, Funding Agency, and PI are required.');
+    if (!form.agency.trim() || !form.pi.trim()) {
+      setValidationError('Funding Agency and PI are required.');
       return;
     }
 
@@ -69,10 +68,11 @@ const AddProjectDialog = ({ open, onClose, onSubmit, submitting, error }) => {
       onClose={handleClose} 
       fullWidth 
       maxWidth="md"
-      // Form context now securely encapsulates the entire content/action ecosystem
-      PaperProps={{
-        component: 'form',
-        onSubmit: handleSubmit,
+      slotProps={{
+        paper: {
+          component: 'form',
+          onSubmit: handleSubmit,
+        },
       }}
     >
       <DialogTitle sx={{ color: colors.midnightBlue, fontWeight: 700 }}>
@@ -86,17 +86,7 @@ const AddProjectDialog = ({ open, onClose, onSubmit, submitting, error }) => {
           )}
 
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12 }}>
-                <TextField
-                  label="Project Title"
-                  value={form.title}
-                  onChange={handleChange('title')}
-                  fullWidth
-                  required
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 6 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="Funding Agency"
                   value={form.agency}
@@ -112,7 +102,7 @@ const AddProjectDialog = ({ open, onClose, onSubmit, submitting, error }) => {
                 value={form.amount}
                 onChange={handleChange('amount')}
                 fullWidth
-                inputProps={{ min: 0 }}
+                slotProps={{ htmlInput: { min: 0 } }}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>

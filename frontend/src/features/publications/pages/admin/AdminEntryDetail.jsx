@@ -69,7 +69,7 @@ export default function AdminEntryDetail({ entries, setEntries, userEmail, addEn
     };
     setLoadingStatus(nextStatus);
     try {
-      const response = await fetch(`/api/publications/${entry.id}/status`, {
+      const response = await fetch(`/api/keshava/publications/${entry.id}/status`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

@@ -25,6 +25,7 @@ import BalanceOutlinedIcon from '@mui/icons-material/BalanceOutlined';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import { usePatents } from '../hooks/usePatents';
 import { colors } from '../theme/colors';
+import PatentCardSkeleton from '../components/skeletons/PatentCardSkeleton';
 
 // ─── Status badge colours (spec-defined) ────────────────────────────────────
 const STATUS_COLORS = {
@@ -217,8 +218,10 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
       onClose={handleClose}
       fullWidth
       maxWidth="md"
-      TransitionProps={{ onEnter: handleOpen }}
-      PaperProps={{ component: 'form', onSubmit: handleSubmit }}
+      slotProps={{
+        transition: { onEnter: handleOpen },
+        paper: { component: 'form', onSubmit: handleSubmit },
+      }}
     >
       <DialogTitle sx={{ color: colors.midnightBlue, fontWeight: 700 }}>
         {isEdit ? 'Edit Patent' : 'Add New Patent'}
@@ -320,7 +323,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
                 value={form.filing_date}
                 onChange={handleChange('filing_date')}
                 fullWidth
-                InputLabelProps={{ shrink: true }}
+                slotProps={{ inputLabel: { shrink: true } }}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}  >
@@ -330,7 +333,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
                 value={form.publication_date}
                 onChange={handleChange('publication_date')}
                 fullWidth
-                InputLabelProps={{ shrink: true }}
+                slotProps={{ inputLabel: { shrink: true } }}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}  >
@@ -340,7 +343,7 @@ function PatentFormDialog({ open, onClose, onSubmit, initialValues, submitting, 
                 value={form.grant_date}
                 onChange={handleChange('grant_date')}
                 fullWidth
-                InputLabelProps={{ shrink: true }}
+                slotProps={{ inputLabel: { shrink: true } }}
               />
             </Grid>
 
@@ -473,8 +476,8 @@ const PatentsPage = () => {
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           justifyContent="space-between"
-          alignItems={{ xs: 'flex-start', md: 'center' }}
           spacing={2}
+          sx={{ alignItems: { xs: 'flex-start', md: 'center' } }}
         >
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <Box
@@ -542,9 +545,7 @@ const PatentsPage = () => {
 
       {/* ── Loading ───────────────────────────────────────────────────────── */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress sx={{ color: colors.academicBlue ?? '#1565C0' }} />
-        </Box>
+        <PatentCardSkeleton />
       ) : patents.length === 0 ? (
         <Paper
           elevation={0}
@@ -573,7 +574,7 @@ const PatentsPage = () => {
         </Paper>
       ) : (
         /* ── Grouped columns ─────────────────────────────────────────────── */
-        <Grid container spacing={3} alignItems="flex-start">
+        <Grid container spacing={3} sx={{ alignItems: 'flex-start' }}>
           {STATUSES.map((status) => {
             const palette = STATUS_COLORS[status];
             const group = grouped[status];

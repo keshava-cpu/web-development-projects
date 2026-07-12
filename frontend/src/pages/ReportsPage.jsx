@@ -19,6 +19,7 @@ import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
 import { fetchReports } from '../api/reports';
 import { colors } from '../theme/colors';
+import ReportsStatSkeleton from '../components/skeletons/ReportsStatSkeleton';
 
 // ── Stat card component ─────────────────────────────────────────────────────
 const StatCard = ({ icon: Icon, label, value, highlight, subtitle }) => (
@@ -121,8 +122,8 @@ const ReportsPage = () => {
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           justifyContent="space-between"
-          alignItems={{ xs: 'flex-start', md: 'center' }}
           spacing={2}
+          sx={{ alignItems: { xs: 'flex-start', md: 'center' } }}
         >
           <Stack direction="row" spacing={1.5} alignItems="center">
             <TrendingUpOutlinedIcon sx={{ fontSize: 32 }} />
@@ -167,9 +168,7 @@ const ReportsPage = () => {
 
       {/* Content */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-          <CircularProgress sx={{ color: colors.academicBlue }} />
-        </Box>
+        <ReportsStatSkeleton />
       ) : reports ? (
         <Stack spacing={3}>
           {/* Section: Record Counts */}

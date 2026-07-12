@@ -124,3 +124,25 @@ CREATE INDEX idx_patents_user_id ON patents (user_id);
 CREATE INDEX idx_consultancy_user_id ON consultancy (user_id);
 CREATE INDEX idx_notifications_user_id ON notifications (user_id);
 CREATE INDEX idx_project_users_user_id ON project_users (user_id);
+
+-- Recreate publications table with proper schema
+-- DROP TABLE IF EXISTS publications CASCADE;
+
+-- CREATE TABLE publications (
+--   id VARCHAR(50) PRIMARY KEY,
+--   title TEXT NOT NULL,
+--   department VARCHAR(100) NOT NULL,
+--   owner VARCHAR(255) NOT NULL,
+--   contributors JSONB NOT NULL DEFAULT '[]'::jsonb,
+--   status VARCHAR(50) NOT NULL DEFAULT 'draft',
+--   summary TEXT,
+--   latest_file VARCHAR(255) DEFAULT 'draft.pdf',
+--   updated_at VARCHAR(100),
+--   review_requested_at VARCHAR(100),
+--   metrics JSONB NOT NULL DEFAULT '{"messageCount": 0, "impactPoints": 0}'::jsonb,
+--   versions JSONB NOT NULL DEFAULT '[]'::jsonb,
+--   timeline JSONB NOT NULL DEFAULT '[]'::jsonb,
+--   messages JSONB NOT NULL DEFAULT '[]'::jsonb,
+--   admin_notes JSONB NOT NULL DEFAULT '[]'::jsonb,
+--   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- );

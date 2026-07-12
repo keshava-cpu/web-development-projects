@@ -35,6 +35,7 @@ import {
   updateConsultancy,
 } from '../api/consultancy';
 import { colors } from '../theme/colors';
+import ConsultancyTableSkeleton from '../components/skeletons/ConsultancyTableSkeleton';
 
 const emptyForm = { industry: '', amount: '', duration: '' };
 
@@ -154,8 +155,8 @@ const ConsultancyPage = () => {
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           justifyContent="space-between"
-          alignItems={{ xs: 'flex-start', md: 'center' }}
           spacing={2}
+          sx={{ alignItems: { xs: 'flex-start', md: 'center' } }}
         >
           <Stack direction="row" spacing={1.5} alignItems="center">
             <BusinessCenterOutlinedIcon sx={{ fontSize: 32 }} />
@@ -208,9 +209,7 @@ const ConsultancyPage = () => {
 
       {/* Table */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-          <CircularProgress sx={{ color: colors.academicBlue }} />
-        </Box>
+        <ConsultancyTableSkeleton />
       ) : records.length === 0 ? (
         <Paper
           elevation={0}

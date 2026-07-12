@@ -62,14 +62,14 @@ const ProjectCard = ({ project }) => (
             </Typography>
           </Stack>
 
-          {project.copi && (
+          {project.co_pi && (
             <Stack direction="row" spacing={1} alignItems="center">
               <GroupsOutlinedIcon sx={{ color: colors.coolGray, fontSize: 18 }} />
               <Typography variant="body2">
                 <Box component="span" sx={{ color: colors.coolGray }}>
                   Co-PI:{' '}
                 </Box>
-                {project.copi}
+                {project.co_pi}
               </Typography>
             </Stack>
           )}

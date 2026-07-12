@@ -7,7 +7,9 @@ import Chip from "@mui/material/Chip";
 import Avatar from "@mui/material/Avatar";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
+import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 import { filterDirectoryUsers, getDirectoryUserLabel } from "../mockData";
 
 export default function UserMultiSelect({
@@ -59,6 +61,18 @@ export default function UserMultiSelect({
                 <SearchIcon sx={{ fontSize: 18, color: "text.secondary" }} />
               </InputAdornment>
             ),
+            endAdornment: query ? (
+              <InputAdornment position="end">
+                <IconButton
+                  size="small"
+                  onClick={() => setQuery("")}
+                  edge="end"
+                  aria-label="clear search"
+                >
+                  <ClearIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </InputAdornment>
+            ) : null,
           },
         }}
         sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}

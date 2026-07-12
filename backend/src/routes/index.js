@@ -1,6 +1,6 @@
 const express = require('express');
 const authRoutes = require('./auth.routes');
-const publicationsRoutes = require('./publications.routes');
+// const publicationsRoutes = require('./publications.routes'); // Unused / replaced by keshava/publications
 const patentsRoutes = require('./patents.routes');
 const consultancyRoutes = require('./consultancy.routes');
 const projectsRoutes = require('./projects.routes');
@@ -10,7 +10,7 @@ const notificationsRoutes = require('./notifications.routes');
 const router = express.Router();
 
 router.use(authRoutes);
-router.use('/publications', publicationsRoutes);
+// router.use('/publications', publicationsRoutes); // Unused / replaced by keshava/publications
 router.use('/patents', patentsRoutes);
 router.use('/consultancy', consultancyRoutes);
 router.use('/projects', projectsRoutes);

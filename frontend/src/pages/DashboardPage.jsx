@@ -34,7 +34,6 @@ const moduleCards = [
     path: "/patents",
     btnLabel: "Open Patents",
     btnId: "dashboard-patents-btn",
-    highlight: true,
   },
   {
     title: "Analytics & Reports",

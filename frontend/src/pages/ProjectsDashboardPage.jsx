@@ -15,6 +15,7 @@ import AddProjectDialog from '../components/projects/AddProjectDialog';
 import { useProjects } from '../hooks/useProjects';
 import { groupProjectsByStatus } from '../utils/projectHelpers';
 import { colors } from '../theme/colors';
+import ProjectCardSkeleton from '../components/skeletons/ProjectCardSkeleton';
 
 const ProjectsDashboardPage = () => {
   const { projects, loading, submitting, error, loadProjects, addProject } = useProjects();
@@ -43,8 +44,8 @@ const ProjectsDashboardPage = () => {
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           justifyContent="space-between"
-          alignItems={{ xs: 'flex-start', md: 'center' }}
           spacing={2}
+          sx={{ alignItems: { xs: 'flex-start', md: 'center' } }}
         >
           <Box>
             <Typography variant="h4" sx={{ color: colors.white, mb: 0.5 }}>
@@ -95,9 +96,7 @@ const ProjectsDashboardPage = () => {
       )}
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress sx={{ color: colors.academicBlue }} />
-        </Box>
+        <ProjectCardSkeleton />
       ) : (
         <ProjectsGrid groupedProjects={groupedProjects} />
       )}

@@ -19,6 +19,7 @@ import Tooltip from "@mui/material/Tooltip";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckIcon from "@mui/icons-material/Check";
 import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SchoolIcon from "@mui/icons-material/School";
 import {
@@ -112,6 +113,15 @@ export default function ProfilePage({ facultyProfile, users, entries, currentUse
     }
   }, [initialDirectoryQuery, initialViewQuery, initialSection, users]);
 
+  useEffect(() => {
+    if (filteredUsers.length > 0) {
+      const isAlreadyInList = filteredUsers.some((u) => u.email === selectedPersonEmail);
+      if (!isAlreadyInList) {
+        setSelectedPersonEmail(filteredUsers[0].email);
+      }
+    }
+  }, [filteredUsers, selectedPersonEmail]);
+
   const selectedPerson = useMemo(
     () => findDirectoryUser(selectedPersonEmail, users) || findDirectoryUser(currentUserEmail, users) || users[0],
     [currentUserEmail, selectedPersonEmail, users],
@@ -123,14 +133,26 @@ export default function ProfilePage({ facultyProfile, users, entries, currentUse
 
   const selectedPersonEntries = useMemo(() => {
     if (!selectedPerson) return [];
-    return entries.filter(
-      (entry) =>
+    return entries.filter((entry) => {
+      const matches =
         entry.owner === selectedPerson.email ||
         entry.owner === selectedPerson.name ||
         entry.contributors.includes(selectedPerson.email) ||
-        entry.contributors.includes(selectedPerson.name),
-    );
-  }, [entries, selectedPerson]);
+        entry.contributors.includes(selectedPerson.name);
+      if (!matches) return false;
+
+      // If the logged-in user (viewer) has access to this entry (is owner, contributor, or admin), show it in any status
+      const userHasAccess =
+        isAdmin ||
+        entry.owner === currentUserEmail ||
+        entry.contributors.includes(currentUserEmail);
+
+      if (userHasAccess) return true;
+
+      // Otherwise, only show approved or published entries to third-party colleagues
+      return entry.status === "published" || entry.status === "approved_for_publication";
+    });
+  }, [entries, selectedPerson, currentUserEmail, isAdmin]);
 
   async function copyEmail() {
     try {
@@ -429,7 +451,19 @@ export default function ProfilePage({ facultyProfile, users, entries, currentUse
                       sx={{ mt: 2, "& .MuiOutlinedInput-root": { borderRadius: "16px", bgcolor: "#FAFCFE" } }}
                       slotProps={{
                         input: {
-                          startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 18, color: "text.secondary" }} /></InputAdornment>
+                          startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 18, color: "text.secondary" }} /></InputAdornment>,
+                          endAdornment: peopleQuery ? (
+                            <InputAdornment position="end">
+                              <IconButton
+                                size="small"
+                                onClick={() => handlePeopleQueryChange("")}
+                                edge="end"
+                                aria-label="clear search"
+                              >
+                                <ClearIcon sx={{ fontSize: 18 }} />
+                              </IconButton>
+                            </InputAdornment>
+                          ) : null
                         }
                       }}
                     />
@@ -610,7 +644,35 @@ export default function ProfilePage({ facultyProfile, users, entries, currentUse
                       </Box>
                     </Box>
 
-                    <Box sx={{ mt: 2.5, borderTop: "1px solid #F1F5F9", pt: 2.5 }}>
+                    {/* Stats summary row */}
+                    <Box sx={{ display: "flex", gap: 3, mt: 2.5, mb: 1, borderTop: "1px solid #F1F5F9", borderBottom: "1px solid #F1F5F9", py: 1.5 }}>
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", fontSize: "0.65rem" }}>
+                          Publications
+                        </Typography>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#0B2D4D", mt: 0.25 }}>
+                          {selectedPersonEntries.length}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", fontSize: "0.65rem" }}>
+                          System Role
+                        </Typography>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0B2D4D", mt: 0.5, textTransform: "capitalize" }}>
+                          {selectedPerson.role}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", fontSize: "0.65rem" }}>
+                          Office
+                        </Typography>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0B2D4D", mt: 0.5 }}>
+                          {selectedPerson.office || "N/A"}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    <Box sx={{ mt: 2.5, pt: 1 }}>
                       <Typography variant="caption" sx={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "text.secondary" }}>Biography</Typography>
                       <Typography variant="body2" sx={{ mt: 1, lineHeight: 1.65, color: "#374151" }}>
                         {selectedPerson.bio || "This user has not set a biography statement yet."}
@@ -628,49 +690,31 @@ export default function ProfilePage({ facultyProfile, users, entries, currentUse
                       </Box>
                     )}
 
-                    {selectedPersonIsSelf ? (
-                      <Box sx={{ mt: 2.5, borderTop: "1px solid #F1F5F9", pt: 2.5 }}>
-                        <Typography variant="caption" sx={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "text.secondary" }}>Your Linked Entries</Typography>
-                        <Stack spacing={1} sx={{ mt: 1.5 }}>
-                          {selectedPersonEntries.slice(0, 3).map((entry) => (
-                            <ButtonBase
-                              key={entry.id}
-                              onClick={() => navigate(`/publications-tracker/dashboard/entries/${entry.id}`)}
-                              sx={{ width: "100%", textAlign: "left", borderRadius: "12px", border: "1px solid #D9E2EC", bgcolor: "#FAFCFE", px: 2, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5, transition: "all 0.15s", "&:hover": { borderColor: "#93C5FD", bgcolor: "#EFF6FF" } }}
-                            >
-                              <Box sx={{ minWidth: 0, flex: 1 }}>
-                                <Typography variant="body2" sx={{ fontWeight: 700, color: "#0B2D4D", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                  {entry.title}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">{entry.department} · {entry.updatedAt}</Typography>
-                              </Box>
-                              <Chip label={formatStatus(entry.status)} size="small" sx={{ ...statusChipSx(entry.status), fontSize: "0.6rem", fontWeight: 700 }} />
-                            </ButtonBase>
-                          ))}
-                          {selectedPersonEntries.length === 0 && (
-                            <Typography variant="caption" color="text.secondary">No entries linked yet.</Typography>
-                          )}
-                        </Stack>
-                      </Box>
-                    ) : (
-                      <Box sx={{ mt: 2.5, borderTop: "1px solid #F1F5F9", pt: 2.5 }}>
-                        <Box sx={{ borderRadius: "12px", border: "1px solid #D9E2EC", bgcolor: "#F8FAFC", p: 2 }}>
-                          <Typography variant="caption" sx={{ fontWeight: 700, color: "#0B2D4D", textTransform: "uppercase", letterSpacing: "0.1em" }}>Public Summary Only</Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1, lineHeight: 1.6 }}>
-                            {profileAccessRestricted
-                              ? "This profile is private. Detailed view history and workflow logs are visible only to the profile owner."
-                              : "Further actions and entry management options are restricted to the selected user's account."}
-                          </Typography>
-                          <Button
-                            size="small"
-                            onClick={() => { setSelectedPersonEmail(currentUserEmail); navigate("/publications-tracker/profile"); }}
-                            sx={{ mt: 2, bgcolor: "#0B2D4D", color: "white", "&:hover": { bgcolor: "#005B96" }, textTransform: "none", fontWeight: 700, borderRadius: "20px", fontSize: "0.72rem" }}
+                    <Box sx={{ mt: 2.5, borderTop: "1px solid #F1F5F9", pt: 2.5 }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "text.secondary" }}>
+                        {selectedPersonIsSelf ? "Your Linked Entries" : "Linked Publications"}
+                      </Typography>
+                      <Stack spacing={1} sx={{ mt: 1.5 }}>
+                        {selectedPersonEntries.slice(0, 5).map((entry) => (
+                          <ButtonBase
+                            key={entry.id}
+                            onClick={() => navigate(`/publications-tracker/dashboard/entries/${entry.id}`)}
+                            sx={{ width: "100%", textAlign: "left", borderRadius: "12px", border: "1px solid #D9E2EC", bgcolor: "#FAFCFE", px: 2, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5, transition: "all 0.15s", "&:hover": { borderColor: "#93C5FD", bgcolor: "#EFF6FF" } }}
                           >
-                            View your profile
-                          </Button>
-                        </Box>
-                      </Box>
-                    )}
+                            <Box sx={{ minWidth: 0, flex: 1 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 700, color: "#0B2D4D", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {entry.title}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">{entry.department} · {entry.updatedAt}</Typography>
+                            </Box>
+                            <Chip label={formatStatus(entry.status)} size="small" sx={{ ...statusChipSx(entry.status), fontSize: "0.6rem", fontWeight: 700 }} />
+                          </ButtonBase>
+                        ))}
+                        {selectedPersonEntries.length === 0 && (
+                          <Typography variant="caption" color="text.secondary">No entries linked yet.</Typography>
+                        )}
+                      </Stack>
+                    </Box>
                   </Card>
                 ) : (
                   <Box sx={{ borderRadius: "16px", border: "1px dashed #D9E2EC", bgcolor: "#FAFCFE", py: 8, textAlign: "center" }}>
