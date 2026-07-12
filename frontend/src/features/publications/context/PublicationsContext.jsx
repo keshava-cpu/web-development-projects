@@ -18,8 +18,8 @@ import {
   useState,
 } from "react";
 import { useLocation, useNavigate, matchPath } from "react-router-dom";
+import { fetchPublications } from "../../../api/publications";
 import { useAuth } from "../../../context/AuthContext";
-
 
 // ─── Helpers (module-scoped, not exported) ────────────────────────────────────
 export function shortId() {
@@ -131,7 +131,7 @@ export function authFetch(url, token, options = {}) {
     headers: {
       "Content-Type": "application/json",
       ...(options.headers || {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      // ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
 }
@@ -180,25 +180,37 @@ export function PublicationsProvider({ children }) {
   const routeEntryId = detailMatch?.params.entryId;
 
   // ── Fetch publications from keshava API on mount ────────────────────────────
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    const controller = new AbortController();
+  const loadPublications = useCallback(async (config = {}) => {
     setEntriesLoading(true);
     setEntriesError(null);
-    authFetch("/api/keshava/publications", token, { signal: controller.signal })
-      .then((res) => res.json())
-      .then((data) => {
-        setEntries(Array.isArray(data.items) ? data.items : []);
-        setEntriesLoading(false);
-      })
-      .catch((err) => {
-        if (err.name !== "AbortError") {
-          setEntriesError("Failed to load publications. Please retry.");
-          setEntriesLoading(false);
-        }
-      });
+    try {
+      // Execute our brand new Axios API action
+      const responseData = await fetchPublications(config);
+
+      // Map data array to your state safely
+      setEntries(Array.isArray(responseData.items) ? responseData.items : []);
+    } catch (err) {
+      // Safely ignore Axios Canceled requests during component unmounts
+      if (err.name !== "CanceledError" && err.code !== "ERR_CANCELED") {
+        console.error("Publications background fetch error:", err);
+        setEntriesError(
+          err.response?.data?.message ||
+            "Failed to load publications. Please retry.",
+        );
+      }
+    } finally {
+      setEntriesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const controller = new AbortController();
+    loadPublications({ signal: controller.signal });
+
     return () => controller.abort();
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, loadPublications]);
 
   // ── Derived state ─────────────────────────────────────────────────────────────
   const currentUserProfile = useMemo(
@@ -345,6 +357,7 @@ export function PublicationsProvider({ children }) {
   async function handleLogout() {
     try {
       await authFetch("/api/keshava/auth/logout", token, { method: "POST" });
+      // await apiClient.post("/keshava/auth/logout");
     } catch {
       // Ignore logout API errors
     }
@@ -434,6 +447,9 @@ export function PublicationsProvider({ children }) {
     entries,
     setEntries,
     entriesLoading,
+
+    setEntriesLoading,
+
     entriesError,
     selectedEntryId,
     setSelectedEntryId,

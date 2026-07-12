@@ -12,7 +12,8 @@ import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
 import { departments } from "../../mockData";
 import UserMultiSelect from "../../components/UserMultiSelect";
-import { useAuth } from "../../../../context/AuthContext";
+import { createPublication } from "../../../../api/publications";
+// import { useAuth } from "../../../../context/AuthContext";
 
 const CreateEntryView = ({
   entryDraft,
@@ -27,7 +28,7 @@ const CreateEntryView = ({
   users,
 }) => {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  // const { token } = useAuth();
 
   return (
     <Box
@@ -108,20 +109,22 @@ const CreateEntryView = ({
                 adminNotes: [],
               };
               try {
-                const response = await fetch("/api/keshava/publications", {
-                  method: "POST",
-                  credentials: "include",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token || localStorage.getItem("token")}`,
-                  },
-                  body: JSON.stringify(newEntry),
-                });
+                console.log("Sending response via Axios...");
+                // const response = await fetch("/api/keshava/publications", {
+                //   method: "POST",
+                //   credentials: "include",
+                //   headers: {
+                //     "Content-Type": "application/json",
+                //     // Authorization: `Bearer ${token || localStorage.getItem("rnd_token")}`,
+                //   },
+                //   body: JSON.stringify(newEntry),
+                // });
+                const result = await createPublication(newEntry);
 
-                if (!response.ok)
-                  throw new Error("Failed to create entry on server");
+                // if (!response.ok)
+                //   throw new Error("Failed to create entry on serversss");
 
-                const result = await response.json();
+                // const result = await response.json();
                 setEntries((current) => [result.item, ...current]);
                 setSelectedEntryId(result.item.id);
                 setEntryDraft(emptyEntry);
@@ -206,7 +209,7 @@ const CreateEntryView = ({
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }}  >
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <Typography
                         variant="body2"
                         sx={{ fontWeight: 500, mb: 0.75, color: "#1F2933" }}
