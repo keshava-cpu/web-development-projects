@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   AppBar,
   Avatar,
@@ -21,10 +21,11 @@ import PeopleOutlineIcon from "@mui/icons-material/PeopleOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ListItemText from "@mui/material/ListItemText";
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { colors } from "../theme/colors";
 import { usePublications } from "../features/publications/context/PublicationsContext";
@@ -41,10 +42,11 @@ const navItems = [
 const TopNavbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [anchorEl, setAnchorEl] = useState(null);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef(null);
-
+  // console.log("location:", location);
   const {
     unreadCount,
     notificationsOpen,
@@ -61,6 +63,8 @@ const TopNavbar = () => {
     "publications-tracker",
   );
 
+  const isAdmin = user?.role == "Admin";
+
   const profileInitials = useMemo(
     () =>
       facultyProfile.displayName
@@ -71,12 +75,36 @@ const TopNavbar = () => {
         .join(""),
     [facultyProfile.displayName],
   );
+  // ── Profile menu click-outside + keyboard close ─────────────────────────────
+  useEffect(() => {
+    function handleClick(e) {
+      if (!profileMenuOpen) return;
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(e.target)
+      ) {
+        setProfileMenuOpen(false);
+      }
+    }
+    function handleKey(e) {
+      if (e.key === "Escape") setProfileMenuOpen(false);
+    }
+
+    window.addEventListener("mousedown", handleClick);
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      window.removeEventListener("mousedown", handleClick);
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, [profileMenuOpen]);
 
   const handleLogout = async () => {
     setAnchorEl(null);
     await logout(); // clears localStorage + calls POST /api/auth/logout (cookie clear)
     navigate("/login", { replace: true });
   };
+
+  console.log("user role:", user.role);
 
   return (
     <AppBar
@@ -103,7 +131,11 @@ const TopNavbar = () => {
             <Button
               key={item.path}
               component={NavLink}
-              to={item.path}
+              to={
+                user?.role == "Admin" && item.label == "Publications Tracker"
+                  ? "/publications-tracker/admin"
+                  : item.path
+              }
               end={item.path === "/"}
               sx={{
                 color: colors.white,
@@ -146,28 +178,34 @@ const TopNavbar = () => {
                ========================================================= */
             <>
               {/* Admin return button */}
-              {/* {showAdminReturnButton && (
-                <Button
-                  size="small"
-                  startIcon={
-                    <ArrowBackIcon sx={{ fontSize: "1rem !important" }} />
-                  }
-                  onClick={() => navigate(adminReturnPath)}
-                  sx={{
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    bgcolor: "rgba(255,255,255,0.1)",
-                    color: "white",
-                    "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
-                    textTransform: "none",
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    borderRadius: "20px",
-                    px: 1.5,
-                  }}
-                >
-                  Back to admin view
-                </Button>
-              )} */}
+              {isAdmin &&
+                !location.pathname.includes("/publications-tracker/admin") && (
+                  <Button
+                    size="small"
+                    startIcon={
+                      <ArrowBackIcon sx={{ fontSize: "1rem !important" }} />
+                    }
+                    onClick={() =>
+                      navigate(
+                        location.state?.returnTo ||
+                          "/publications-tracker/admin",
+                      )
+                    }
+                    sx={{
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      bgcolor: "rgba(255,255,255,0.1)",
+                      color: "white",
+                      "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
+                      textTransform: "none",
+                      fontSize: "0.8rem",
+                      fontWeight: 600,
+                      borderRadius: "20px",
+                      px: 1.5,
+                    }}
+                  >
+                    Back to admin view
+                  </Button>
+                )}
 
               {/* Notifications Wrapper */}
               <Box ref={notificationsRef} sx={{ position: "relative" }}>
