@@ -27,7 +27,7 @@ const ProjectSection = ({ title, projects, emptyMessage }) => (
     ) : (
       <Grid container spacing={2.5}>
         {projects.map((project) => (
-          <Grid key={project.id} size={{ xs: 12, sm: 6, lg: 4 }}>
+          <Grid key={project.project_id} size={{ xs: 12, sm: 6, lg: 4 }}>
             <ProjectCard project={project} />
           </Grid>
         ))}

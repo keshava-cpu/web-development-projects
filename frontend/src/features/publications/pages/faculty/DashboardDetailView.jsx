@@ -13,6 +13,7 @@ import Fab from "@mui/material/Fab";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -38,6 +39,7 @@ import PeopleOutlineIcon from "@mui/icons-material/PeopleOutlined";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import Paper from "@mui/material/Paper";
 import { useAuth } from "../../../../context/AuthContext";
+import PublicationsDetailSkeleton from "../../../../components/skeletons/PublicationsDetailSkeleton";
 
 // Map legacy status class strings to MUI sx props
 const STATUS_SX = {
@@ -94,12 +96,22 @@ const DashboardDetailView = ({
   selectEntry,
   isAdmin,
   users,
+  loading,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const returnToAdmin = location.state?.returnTo;
   const [sidebarStatusFilter, setSidebarStatusFilter] = useState("all");
   const { token } = useAuth();
+
+  const sidebarFiltered = useMemo(() => {
+    if (sidebarStatusFilter === "all") return filteredEntries;
+    return filteredEntries.filter((e) => e.status === sidebarStatusFilter);
+  }, [filteredEntries, sidebarStatusFilter]);
+
+  if (loading) {
+    return <PublicationsDetailSkeleton />;
+  }
 
   const SIDEBAR_STATUS_FILTERS = [
     { label: "All", value: "all" },
@@ -110,11 +122,6 @@ const DashboardDetailView = ({
     { label: "Published", value: "published" },
     { label: "Closed", value: "closed" },
   ];
-
-  const sidebarFiltered = useMemo(() => {
-    if (sidebarStatusFilter === "all") return filteredEntries;
-    return filteredEntries.filter((e) => e.status === sidebarStatusFilter);
-  }, [filteredEntries, sidebarStatusFilter]);
 
   const openProfile = (identifier) =>
     navigate(
@@ -317,6 +324,18 @@ const DashboardDetailView = ({
                         />
                       </InputAdornment>
                     ),
+                    endAdornment: search ? (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={() => setSearch("")}
+                          edge="end"
+                          aria-label="clear search"
+                        >
+                          <ClearIcon sx={{ fontSize: 18 }} />
+                        </IconButton>
+                      </InputAdornment>
+                    ) : null,
                   },
                 }}
                 sx={{

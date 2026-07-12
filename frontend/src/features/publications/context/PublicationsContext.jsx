@@ -152,7 +152,7 @@ export function PublicationsProvider({ children }) {
   const userEmail = authUser?.email || "";
   const userName = authUser?.name || authUser?.email || "";
   // TODO: fallback role was initialRole from mockData, using least-privileged default 'Faculty'
-  const role = authUser?.role || "Faculty";
+  const role = (authUser?.role || "faculty").toLowerCase();
   const isAdmin = role === "admin";
 
   // ── State ────────────────────────────────────────────────────────────────────
@@ -336,14 +336,7 @@ export function PublicationsProvider({ children }) {
             user.email.toLowerCase() === normalizedEmail ? profile : user,
           )
         : [...current, profile];
-      const extraProfiles = nextUsers.filter(
-        (user) =>
-          !directoryUsers.some(
-            (reference) =>
-              reference.email.toLowerCase() === user.email.toLowerCase(),
-          ),
-      );
-      persistStoredProfiles(extraProfiles);
+      persistStoredProfiles(nextUsers);
       return nextUsers;
     });
     navigate("/publications-tracker/dashboard", { replace: true });

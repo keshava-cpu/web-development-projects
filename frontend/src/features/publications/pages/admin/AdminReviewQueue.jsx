@@ -94,7 +94,7 @@ export default function AdminReviewQueue({ entries, setEntries, userEmail, addEn
       details: { fromStatus: entry.status, toStatus: nextStatus },
     };
     try {
-      const response = await fetch(`/api/publications/${entry.id}/status`, {
+      const response = await fetch(`/api/keshava/publications/${entry.id}/status`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

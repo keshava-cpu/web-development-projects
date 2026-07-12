@@ -6,8 +6,11 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import Chip from "@mui/material/Chip";
 import ButtonBase from "@mui/material/ButtonBase";
+import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import PublicationsListSkeleton from "../../../../components/skeletons/PublicationsListSkeleton";
 
 const STATUS_FILTERS = [
   { label: "All", value: "all" },
@@ -19,7 +22,7 @@ const STATUS_FILTERS = [
   { label: "Closed", value: "closed" },
 ];
 
-const DashboardListView = ({ search, setSearch, filteredEntries: allEntries, selectEntry, statusClasses, statusLabels }) => {
+const DashboardListView = ({ search, setSearch, filteredEntries: allEntries, selectEntry, statusClasses, statusLabels, loading }) => {
   const [statusFilter, setStatusFilter] = useState("all");
 
   // Map legacy Tailwind class strings to MUI sx styles
@@ -36,6 +39,19 @@ const DashboardListView = ({ search, setSearch, filteredEntries: allEntries, sel
     if (statusFilter === "all") return allEntries;
     return allEntries.filter((e) => e.status === statusFilter);
   }, [allEntries, statusFilter]);
+
+  if (loading) {
+    return (
+      <Box sx={{ width: "100%", flex: 1, display: "flex", overflow: "hidden", bgcolor: "#FAFCFE" }}>
+        <Box
+          component="section"
+          sx={{ mx: "auto", width: "100%", maxWidth: 1280, flex: 1, px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 } }}
+        >
+          <PublicationsListSkeleton />
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ width: "100%", flex: 1, display: "flex", overflow: "hidden", bgcolor: "#FAFCFE" }}>
@@ -86,6 +102,18 @@ const DashboardListView = ({ search, setSearch, filteredEntries: allEntries, sel
                         <SearchIcon sx={{ fontSize: 18, color: "text.secondary" }} />
                       </InputAdornment>
                     ),
+                    endAdornment: search ? (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={() => setSearch("")}
+                          edge="end"
+                          aria-label="clear search"
+                        >
+                          <ClearIcon sx={{ fontSize: 18 }} />
+                        </IconButton>
+                      </InputAdornment>
+                    ) : null,
                   },
                 }}
               />

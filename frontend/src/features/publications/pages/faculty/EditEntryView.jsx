@@ -42,7 +42,6 @@ const EditEntryView = ({
     setSelectedEntryId(selectedEntryId);
   }, [selectedEntryId, setSelectedEntryId]);
 
-  console.log(selectedEntry);
 
   return (
     <Box
