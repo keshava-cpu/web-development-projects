@@ -23,20 +23,21 @@ CREATE TABLE users (
 -- ---------------------------------------------------------------------------
 -- Publication(Publication_ID, Title, DOI, Year, Proof)
 -- Relationship: User 1:N Publications
+-- Look down at the bottom for another implementation
 -- ---------------------------------------------------------------------------
-CREATE TABLE publications (
-  publication_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  user_id        INT UNSIGNED NOT NULL,
-  title          VARCHAR(500) NOT NULL,
-  doi            VARCHAR(255),
-  year           YEAR,
-  proof          VARCHAR(500) COMMENT 'File path or cloud reference',
-  created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT fk_publications_user
-    FOREIGN KEY (user_id) REFERENCES users (user_id)
-    ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
+-- CREATE TABLE publications (
+--   publication_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+--   user_id        INT UNSIGNED NOT NULL,
+--   title          VARCHAR(500) NOT NULL,
+--   doi            VARCHAR(255),
+--   year           YEAR,
+--   proof          VARCHAR(500) COMMENT 'File path or cloud reference',
+--   created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   updated_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--   CONSTRAINT fk_publications_user
+--     FOREIGN KEY (user_id) REFERENCES users (user_id)
+--     ON DELETE CASCADE ON UPDATE CASCADE
+-- ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------------
 -- Patent(Patent_ID, Title, Status, Number, Document)
@@ -79,6 +80,7 @@ CREATE TABLE consultancy (
 -- ---------------------------------------------------------------------------
 CREATE TABLE projects (
   id                      INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title                   VARCHAR(255) NOT NULL DEFAULT 'Untitled',
   agency                  VARCHAR(255) NOT NULL,
   amount                  DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
   pi                      VARCHAR(255) NOT NULL COMMENT 'Principal Investigator',
@@ -128,21 +130,21 @@ CREATE INDEX idx_project_users_user_id ON project_users (user_id);
 -- Recreate publications table with proper schema
 -- DROP TABLE IF EXISTS publications CASCADE;
 
--- CREATE TABLE publications (
---   id VARCHAR(50) PRIMARY KEY,
---   title TEXT NOT NULL,
---   department VARCHAR(100) NOT NULL,
---   owner VARCHAR(255) NOT NULL,
---   contributors JSONB NOT NULL DEFAULT '[]'::jsonb,
---   status VARCHAR(50) NOT NULL DEFAULT 'draft',
---   summary TEXT,
---   latest_file VARCHAR(255) DEFAULT 'draft.pdf',
---   updated_at VARCHAR(100),
---   review_requested_at VARCHAR(100),
---   metrics JSONB NOT NULL DEFAULT '{"messageCount": 0, "impactPoints": 0}'::jsonb,
---   versions JSONB NOT NULL DEFAULT '[]'::jsonb,
---   timeline JSONB NOT NULL DEFAULT '[]'::jsonb,
---   messages JSONB NOT NULL DEFAULT '[]'::jsonb,
---   admin_notes JSONB NOT NULL DEFAULT '[]'::jsonb,
---   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
--- );
+CREATE TABLE publications (
+  id VARCHAR(50) PRIMARY KEY,
+  title TEXT NOT NULL,
+  department VARCHAR(100) NOT NULL,
+  owner VARCHAR(255) NOT NULL,
+  contributors JSONB NOT NULL DEFAULT '[]'::jsonb,
+  status VARCHAR(50) NOT NULL DEFAULT 'draft',
+  summary TEXT,
+  latest_file VARCHAR(255) DEFAULT 'draft.pdf',
+  updated_at VARCHAR(100),
+  review_requested_at VARCHAR(100),
+  metrics JSONB NOT NULL DEFAULT '{"messageCount": 0, "impactPoints": 0}'::jsonb,
+  versions JSONB NOT NULL DEFAULT '[]'::jsonb,
+  timeline JSONB NOT NULL DEFAULT '[]'::jsonb,
+  messages JSONB NOT NULL DEFAULT '[]'::jsonb,
+  admin_notes JSONB NOT NULL DEFAULT '[]'::jsonb,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

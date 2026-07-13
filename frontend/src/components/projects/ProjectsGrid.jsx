@@ -1,11 +1,21 @@
-import Grid from '@mui/material/Grid';
-import { Typography, Box, Stack } from '@mui/material';
-import ProjectCard from './ProjectCard';
-import { colors } from '../../theme/colors';
+import Grid from "@mui/material/Grid";
+import { Typography, Box, Stack } from "@mui/material";
+import ProjectCard from "./ProjectCard";
+import { colors } from "../../theme/colors";
+import { useAuth } from "../../context/AuthContext"; // Adjust path as needed
 
-const ProjectSection = ({ title, projects, emptyMessage }) => (
+// Accept onEdit as a prop here
+const ProjectSection = ({ title, projects, emptyMessage, onEdit }) => (
   <Box sx={{ mb: 4 }}>
-    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+    {/* Layout properties securely moved into the sx prop object */}
+    <Stack
+      direction="row"
+      sx={{
+        justifyContent: "space-between",
+        alignItems: "center",
+        mb: 2,
+      }}
+    >
       <Typography variant="h6" sx={{ color: colors.midnightBlue }}>
         {title}
       </Typography>
@@ -19,7 +29,7 @@ const ProjectSection = ({ title, projects, emptyMessage }) => (
           borderRadius: 2,
           border: `1px dashed ${colors.lightSteel}`,
           bgcolor: colors.white,
-          textAlign: 'center',
+          textAlign: "center",
         }}
       >
         <Typography variant="body2">{emptyMessage}</Typography>
@@ -27,8 +37,12 @@ const ProjectSection = ({ title, projects, emptyMessage }) => (
     ) : (
       <Grid container spacing={2.5}>
         {projects.map((project) => (
-          <Grid key={project.project_id} size={{ xs: 12, sm: 6, lg: 4 }}>
-            <ProjectCard project={project} />
+          <Grid
+            key={project.project_id || project.id}
+            size={{ xs: 12, sm: 6, lg: 4 }}
+          >
+            {/* If user is admin, pass down the handler; otherwise pass null */}
+            <ProjectCard project={project} onEdit={onEdit} />
           </Grid>
         ))}
       </Grid>
@@ -36,32 +50,44 @@ const ProjectSection = ({ title, projects, emptyMessage }) => (
   </Box>
 );
 
-const ProjectsGrid = ({ groupedProjects }) => (
-  <Box>
-    <ProjectSection
-      title="Active Projects"
-      projects={groupedProjects.active}
-      emptyMessage="No active funded projects yet."
-    />
-    <ProjectSection
-      title="Pending Projects"
-      projects={groupedProjects.pending}
-      emptyMessage="No pending project submissions."
-    />
-    <ProjectSection
-      title="Completed Projects"
-      projects={groupedProjects.completed}
-      emptyMessage="No completed or approved projects recorded."
-    />
-    {groupedProjects.rejected.length > 0 && (
+// Accept onEdit from the parent dashboard container
+const ProjectsGrid = ({ groupedProjects, onEdit }) => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "Admin";
+
+  // Only pass the edit handler if the user is verified as an Admin
+  const handleEdit = isAdmin ? onEdit : null;
+
+  return (
+    <Box>
       <ProjectSection
-        title="Rejected Projects"
-        projects={groupedProjects.rejected}
-        emptyMessage="No rejected projects."
+        title="Active Projects"
+        projects={groupedProjects.active}
+        emptyMessage="No active funded projects yet."
+        onEdit={handleEdit}
       />
-    )}
-  </Box>
-);
+      <ProjectSection
+        title="Pending Projects"
+        projects={groupedProjects.pending}
+        emptyMessage="No pending project submissions."
+        onEdit={handleEdit}
+      />
+      <ProjectSection
+        title="Completed Projects"
+        projects={groupedProjects.completed}
+        emptyMessage="No completed or approved projects recorded."
+        onEdit={handleEdit}
+      />
+      {groupedProjects.rejected.length > 0 && (
+        <ProjectSection
+          title="Rejected Projects"
+          projects={groupedProjects.rejected}
+          emptyMessage="No rejected projects."
+          onEdit={handleEdit}
+        />
+      )}
+    </Box>
+  );
+};
 
 export default ProjectsGrid;
-
