@@ -17,35 +17,35 @@
  *
  * Response envelope: { status, message, data } — via sendSuccess / sendFailure.
  */
-const pool = require('../config/db');
-const { sendSuccess, sendFailure } = require('../utils/response');
+const pool = require("../config/db");
+const { sendSuccess, sendFailure } = require("../utils/response");
 
 // ─── CREATE ────────────────────────────────────────────────────────────────────
 const createProject = async (req, res, next) => {
   try {
-    const { agency, amount, pi, co_pi, copi, status } = req.body;
+    const { title, agency, amount, pi, co_pi, copi, status } = req.body;
     const ownerUserId = req.user.user_id;
 
     // Accept either co_pi (spec column name) or copi (old frontend field name)
     const coPI = co_pi || copi || null;
 
-    if (!agency || !pi || !status) {
+    if (!title || !agency || !pi || !status) {
       return sendFailure(res, {
         statusCode: 400,
-        message: 'Agency, PI, and status are required.',
+        message: "Title, Agency, PI, and status are required.",
       });
     }
 
     const result = await pool.query(
-      `INSERT INTO projects (agency, amount, pi, co_pi, status, owner_user_id)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO projects (title, agency, amount, pi, co_pi, status, owner_user_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-      [agency, amount || 0, pi, coPI, status, ownerUserId],
+      [title, agency, amount || 0, pi, coPI, status, ownerUserId],
     );
 
     return sendSuccess(res, {
       statusCode: 201,
-      message: 'Project created successfully.',
+      message: "Project created successfully.",
       data: result.rows[0],
     });
   } catch (error) {
@@ -56,12 +56,15 @@ const createProject = async (req, res, next) => {
 // ─── GET ALL ───────────────────────────────────────────────────────────────────
 const getProjects = async (req, res, next) => {
   try {
-    const isAdmin = req.user?.role === 'admin';
+    const isAdmin = req.user?.role === "Admin";
     const ownerUserId = req.user?.user_id;
+    console.log("getting projects, is Admin test:", isAdmin);
 
     let result;
     if (isAdmin) {
-      result = await pool.query(`SELECT * FROM projects ORDER BY created_at DESC`);
+      result = await pool.query(
+        `SELECT * FROM projects ORDER BY created_at DESC`,
+      );
     } else {
       result = await pool.query(
         `SELECT * FROM projects WHERE owner_user_id = $1 ORDER BY created_at DESC`,
@@ -70,7 +73,7 @@ const getProjects = async (req, res, next) => {
     }
 
     return sendSuccess(res, {
-      message: 'Projects retrieved successfully.',
+      message: "Projects retrieved successfully.",
       data: result.rows,
     });
   } catch (error) {
@@ -82,7 +85,7 @@ const getProjects = async (req, res, next) => {
 const getProjectById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const isAdmin = req.user?.role === 'admin';
+    const isAdmin = req.user?.role === "Admin";
     const ownerUserId = req.user?.user_id;
 
     const result = await pool.query(
@@ -91,7 +94,10 @@ const getProjectById = async (req, res, next) => {
     );
 
     if (result.rows.length === 0) {
-      return sendFailure(res, { statusCode: 404, message: 'Project not found.' });
+      return sendFailure(res, {
+        statusCode: 404,
+        message: "Project not found.",
+      });
     }
 
     const project = result.rows[0];
@@ -99,12 +105,12 @@ const getProjectById = async (req, res, next) => {
     if (!isAdmin && String(project.owner_user_id) !== String(ownerUserId)) {
       return sendFailure(res, {
         statusCode: 403,
-        message: 'You are not authorised to view this project.',
+        message: "You are not authorised to view this project.",
       });
     }
 
     return sendSuccess(res, {
-      message: 'Project retrieved successfully.',
+      message: "Project retrieved successfully.",
       data: project,
     });
   } catch (error) {
@@ -116,9 +122,9 @@ const getProjectById = async (req, res, next) => {
 const updateProject = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { agency, amount, pi, co_pi, copi, status } = req.body;
+    const { title, agency, amount, pi, co_pi, copi, status } = req.body;
     const coPI = co_pi || copi || null;
-    const isAdmin = req.user?.role === 'admin';
+    const isAdmin = req.user?.role === "Admin";
     const ownerUserId = req.user?.user_id;
 
     const existing = await pool.query(
@@ -127,34 +133,53 @@ const updateProject = async (req, res, next) => {
     );
 
     if (existing.rows.length === 0) {
-      return sendFailure(res, { statusCode: 404, message: 'Project not found.' });
-    }
-
-    if (!isAdmin && String(existing.rows[0].owner_user_id) !== String(ownerUserId)) {
       return sendFailure(res, {
-        statusCode: 403,
-        message: 'You are not authorised to edit this project.',
+        statusCode: 404,
+        message: "Project not found.",
       });
     }
 
+    if (
+      !isAdmin &&
+      String(existing.rows[0].owner_user_id) !== String(ownerUserId)
+    ) {
+      return sendFailure(res, {
+        statusCode: 403,
+        message: "You are not authorised to edit this project.",
+      });
+    }
+
+    // FIXED: Adjusted parameters cleanly from $1 to $7
     const result = await pool.query(
       `UPDATE projects
-       SET agency = COALESCE($1, agency),
-           amount = COALESCE($2, amount),
-           pi     = COALESCE($3, pi),
-           co_pi  = COALESCE($4, co_pi),
-           status = COALESCE($5, status)
-       WHERE project_id = $6
+       SET title  = COALESCE($1, title),
+           agency = COALESCE($2, agency),
+           amount = COALESCE($3, amount),
+           pi     = COALESCE($4, pi),
+           co_pi  = COALESCE($5, co_pi),
+           status = COALESCE($6, status)
+       WHERE project_id = $7
        RETURNING *`,
-      [agency || null, amount != null ? amount : null, pi || null, coPI, status || null, id],
+      [
+        title || null,
+        agency || null,
+        amount !== undefined && amount !== null ? amount : null,
+        pi || null,
+        coPI,
+        status === "Active" ? "Ongoing" : status || null,
+        id, // This is safely matched with $7 now
+      ],
     );
 
     if (result.rowCount === 0) {
-      return sendFailure(res, { statusCode: 404, message: 'Project not found.' });
+      return sendFailure(res, {
+        statusCode: 404,
+        message: "Project not found.",
+      });
     }
 
     return sendSuccess(res, {
-      message: 'Project updated successfully.',
+      message: "Project updated successfully.",
       data: result.rows[0],
     });
   } catch (error) {
@@ -166,7 +191,7 @@ const updateProject = async (req, res, next) => {
 const deleteProject = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const isAdmin = req.user?.role === 'admin';
+    const isAdmin = req.user?.role === "Admin";
     const ownerUserId = req.user?.user_id;
 
     const existing = await pool.query(
@@ -175,20 +200,26 @@ const deleteProject = async (req, res, next) => {
     );
 
     if (existing.rows.length === 0) {
-      return sendFailure(res, { statusCode: 404, message: 'Project not found.' });
-    }
-
-    if (!isAdmin && String(existing.rows[0].owner_user_id) !== String(ownerUserId)) {
       return sendFailure(res, {
-        statusCode: 403,
-        message: 'You are not authorised to delete this project.',
+        statusCode: 404,
+        message: "Project not found.",
       });
     }
 
-    await pool.query('DELETE FROM projects WHERE project_id = $1', [id]);
+    if (
+      !isAdmin &&
+      String(existing.rows[0].owner_user_id) !== String(ownerUserId)
+    ) {
+      return sendFailure(res, {
+        statusCode: 403,
+        message: "You are not authorised to delete this project.",
+      });
+    }
+
+    await pool.query("DELETE FROM projects WHERE project_id = $1", [id]);
 
     return sendSuccess(res, {
-      message: 'Project deleted successfully.',
+      message: "Project deleted successfully.",
       data: null,
     });
   } catch (error) {

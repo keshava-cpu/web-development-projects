@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 import {
   createProject,
   deleteProject,
   fetchProjects,
   updateProject,
-} from '../api/projects';
+} from "../api/projects";
 
 export const useProjects = () => {
   const [projects, setProjects] = useState([]);
@@ -20,7 +20,7 @@ export const useProjects = () => {
       const response = await fetchProjects();
       setProjects(response.data || []);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load projects.');
+      setError(err.response?.data?.message || "Failed to load projects.");
     } finally {
       setLoading(false);
     }
@@ -28,7 +28,7 @@ export const useProjects = () => {
 
   /**
    * addProject
-   * Payload: { agency, amount, pi, co_pi, status }
+   * Payload: { title, agency, amount, pi, co_pi, status }
    * Note: `title` and file upload removed — not in Supabase spec schema.
    */
   const addProject = useCallback(
@@ -37,11 +37,12 @@ export const useProjects = () => {
       setError(null);
 
       const payload = {
+        title: formValues.title,
         agency: formValues.agency,
         amount: formValues.amount || 0,
         pi: formValues.pi,
-        co_pi: formValues.copi || formValues.co_pi || '',
-        status: formValues.status || 'Pending',
+        co_pi: formValues.copi || formValues.co_pi || "",
+        status: formValues.status || "Pending",
       };
 
       try {
@@ -49,7 +50,8 @@ export const useProjects = () => {
         await loadProjects();
         return response;
       } catch (err) {
-        const message = err.response?.data?.message || 'Failed to create project.';
+        const message =
+          err.response?.data?.message || "Failed to create project.";
         setError(message);
         throw new Error(message);
       } finally {
@@ -65,6 +67,7 @@ export const useProjects = () => {
       setError(null);
 
       const payload = {
+        title: formValues.title, // Include title here
         agency: formValues.agency,
         amount: formValues.amount,
         pi: formValues.pi,
@@ -77,7 +80,8 @@ export const useProjects = () => {
         await loadProjects();
         return response;
       } catch (err) {
-        const message = err.response?.data?.message || 'Failed to update project.';
+        const message =
+          err.response?.data?.message || "Failed to update project.";
         setError(message);
         throw new Error(message);
       } finally {
@@ -97,7 +101,8 @@ export const useProjects = () => {
         await loadProjects();
         return response;
       } catch (err) {
-        const message = err.response?.data?.message || 'Failed to delete project.';
+        const message =
+          err.response?.data?.message || "Failed to delete project.";
         setError(message);
         throw new Error(message);
       } finally {
