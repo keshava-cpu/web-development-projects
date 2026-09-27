@@ -22,6 +22,7 @@ import {
   FieldLabel,
   FieldTitle,
   FieldError,
+  FieldGroup,
 } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
 import type { RefObject } from "react";
@@ -38,7 +39,7 @@ export default function App() {
   const [isResetting, setIsResetting] = useState(false);
 
   return (
-    <div className="mt-50 flex flex-col items-center justify-center gap-5">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-5">
       <CounterProvider>
         <ResettingContext.Provider value={isResetting}>
           <CounterButton
@@ -69,32 +70,56 @@ function CounterButton({ isResetting, setIsResetting }: CounterButtonProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [resetOnOutsideClick, setResetOnOutsideClick] = useState(true);
   const [increment, setIncrement] = useState(1);
+  const [capVal, setCapVal] = useState(10);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   interface simpleFormI {
     InputNum: number;
   }
+  interface simpleForm2I {
+    CapVal: number;
+  }
   const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
+    register: registerInc,
+    handleSubmit: handleSubmitInc,
+    reset: resetInc,
+    formState: { errors: IncErrors },
   } = useForm<simpleFormI>({
     defaultValues: {
       InputNum: 1,
     },
   });
+  const {
+    register: registerCap,
+    handleSubmit: handleSubmitCap,
+    reset: resetCap,
+    formState: { errors: CapErrors },
+  } = useForm<simpleForm2I>({
+    defaultValues: {
+      CapVal: 10,
+    },
+  });
   const actionOnSubmit: SubmitHandler<simpleFormI> = ({ InputNum }) => {
     if (isNaN(InputNum)) {
       triggerReset();
+      return;
     }
     setIncrement(InputNum);
+  };
+  const actionOnSubmitForm2: SubmitHandler<simpleForm2I> = ({ CapVal }) => {
+    if (isNaN(CapVal)) {
+      triggerReset();
+      return;
+    }
+    setCapVal(CapVal);
   };
 
   const triggerReset = async () => {
     setIsResetting(true);
     setDialogOpen(false);
     setIncrement(1);
-    reset({ InputNum: 1 });
+    setCapVal(10);
+    resetInc({ InputNum: 1 });
+    resetCap({ CapVal: 10 });
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -135,12 +160,11 @@ function CounterButton({ isResetting, setIsResetting }: CounterButtonProps) {
             const nextValue: number = val + increment;
             dispatch({ type: "setCount", value: nextValue });
 
-            if (nextValue >= 10) {
+            if (nextValue >= capVal) {
               setDialogOpen(true);
               const id = toast.add({
                 type: "warning",
-                description:
-                  "Heads up! You cannot increment counter more than 10",
+                description: `Heads up! You cannot increment counter more than ${capVal}`,
                 actionProps: {
                   children: "Reset",
                   onClick() {
@@ -151,7 +175,7 @@ function CounterButton({ isResetting, setIsResetting }: CounterButtonProps) {
               });
             }
           }}
-          disabled={isResetting || val > 10}
+          disabled={isResetting || val > capVal}
           className={"min-w-30"}
         >
           {isResetting ? (
@@ -180,24 +204,74 @@ function CounterButton({ isResetting, setIsResetting }: CounterButtonProps) {
         )}
       </Button>
 
-      <form onSubmit={handleSubmit(actionOnSubmit)}>
+      <form onSubmit={handleSubmitInc(actionOnSubmit)}>
+        <FieldGroup>
+          <Field orientation={"horizontal"}>
+            <FieldLabel htmlFor="InputNumber">Step increment:</FieldLabel>
+            <Input
+              type="number"
+              id="InputNumber"
+              {...registerInc("InputNum", {
+                min: { value: 1, message: "Increment must be at least 1" },
+                max: { value: 100, message: "Increment must be at-most 100" },
+                valueAsNumber: true,
+              })}
+            />
+            <Button
+              type="submit"
+              disabled={isResetting}
+              className={"relative min-w-15"}
+            >
+              {isResetting && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Spinner data-icon="inline-start" />
+                </div>
+              )}
+              <span className={isResetting ? "invisible" : "visible"}>
+                Enter
+              </span>
+            </Button>
+          </Field>
+        </FieldGroup>
+
+        {IncErrors.InputNum && (
+          <FieldError
+            errors={[{ message: String(IncErrors.InputNum.message) }]}
+          />
+        )}
+      </form>
+
+      <form onSubmit={handleSubmitCap(actionOnSubmitForm2)}>
         <Field orientation={"horizontal"}>
+          <FieldLabel htmlFor="cap-value">Cap Value</FieldLabel>
           <Input
+            id="cap-value"
             type="number"
-            {...register("InputNum", {
-              min: { value: 1, message: "Increment must be at least 1" },
-              max: { value: 100, message: "Increment must be at-most 100" },
+            {...registerCap("CapVal", {
+              min: { value: 1, message: "Min value is 1" },
+              max: { value: 1000, message: "CapVal must be at-most 1000" },
               valueAsNumber: true,
             })}
+            placeholder="Enter cap value..."
           />
-          <Button type="submit" className={"min-w-20"}>
-            {" "}
-            {isResetting && <Spinner data-icon="inline-start" />} Enter
+          <Button
+            type="submit"
+            disabled={isResetting}
+            className={"relative min-w-15"}
+          >
+            {isResetting && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Spinner data-icon="inline-start" />
+              </div>
+            )}
+            <span className={isResetting ? "invisible" : "visible"}>Enter</span>
           </Button>
         </Field>
 
-        {errors.InputNum && (
-          <FieldError errors={[{ message: String(errors.InputNum.message) }]} />
+        {CapErrors.CapVal && (
+          <FieldError
+            errors={[{ message: String(CapErrors.CapVal.message) }]}
+          />
         )}
       </form>
 
