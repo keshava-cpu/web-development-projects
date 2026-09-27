@@ -21,6 +21,7 @@ import {
   FieldDescription,
   FieldLabel,
   FieldTitle,
+  FieldError,
 } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
 import type { RefObject } from "react";
@@ -28,7 +29,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "./components/ui/spinner";
 import { createContext, useContext } from "react";
 import { toast, Toaster } from "@/components/ui/toast";
-// import { Viewport } from "./App.css"
+import { Input } from "./components/ui/input";
+import { useForm, type SubmitHandler } from "react-hook-form";
 
 const ResettingContext = createContext<boolean | null>(null);
 
@@ -66,11 +68,33 @@ function CounterButton({ isResetting, setIsResetting }: CounterButtonProps) {
   const dispatch = useCounterDispatch();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [resetOnOutsideClick, setResetOnOutsideClick] = useState(true);
+  const [increment, setIncrement] = useState(1);
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  interface simpleFormI {
+    InputNum: number;
+  }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<simpleFormI>({
+    defaultValues: {
+      InputNum: 1,
+    },
+  });
+  const actionOnSubmit: SubmitHandler<simpleFormI> = ({ InputNum }) => {
+    if (isNaN(InputNum)) {
+      triggerReset();
+    }
+    setIncrement(InputNum);
+  };
 
   const triggerReset = async () => {
     setIsResetting(true);
     setDialogOpen(false);
+    setIncrement(1);
+    reset({ InputNum: 1 });
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -88,8 +112,8 @@ function CounterButton({ isResetting, setIsResetting }: CounterButtonProps) {
   );
 
   return (
-    <div className="flex gap-5">
-      <FieldLabel htmlFor="switch-share">
+    <div className="flex flex-col gap-5">
+      <FieldLabel htmlFor="switch-share" className="max-w-xs">
         <Field orientation="horizontal">
           <FieldContent>
             <FieldTitle> Want safety Reset?</FieldTitle>
@@ -108,7 +132,7 @@ function CounterButton({ isResetting, setIsResetting }: CounterButtonProps) {
       <>
         <Button
           onClick={() => {
-            const nextValue = val + 5;
+            const nextValue: number = val + increment;
             dispatch({ type: "setCount", value: nextValue });
 
             if (nextValue >= 10) {
@@ -127,7 +151,7 @@ function CounterButton({ isResetting, setIsResetting }: CounterButtonProps) {
               });
             }
           }}
-          disabled={val > 10}
+          disabled={isResetting || val > 10}
           className={"min-w-30"}
         >
           {isResetting ? (
@@ -156,6 +180,27 @@ function CounterButton({ isResetting, setIsResetting }: CounterButtonProps) {
         )}
       </Button>
 
+      <form onSubmit={handleSubmit(actionOnSubmit)}>
+        <Field orientation={"horizontal"}>
+          <Input
+            type="number"
+            {...register("InputNum", {
+              min: { value: 1, message: "Increment must be at least 1" },
+              max: { value: 100, message: "Increment must be at-most 100" },
+              valueAsNumber: true,
+            })}
+          />
+          <Button type="submit" className={"min-w-20"}>
+            {" "}
+            {isResetting && <Spinner data-icon="inline-start" />} Enter
+          </Button>
+        </Field>
+
+        {errors.InputNum && (
+          <FieldError errors={[{ message: String(errors.InputNum.message) }]} />
+        )}
+      </form>
+
       <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <AlertDialogContent ref={dialogRef} size={"sm"}>
           <AlertDialogHeader>
@@ -178,7 +223,7 @@ function CounterButton({ isResetting, setIsResetting }: CounterButtonProps) {
 
 function FirstGenChild({ children }: { children: React.ReactNode }) {
   return (
-    <div className="wrapper min-h-25 min-w-xs border-2 p-2">
+    <div className="wrapper min-h-25 min-w-xs rounded-sm border border-gray-300 p-2">
       <h1 className="h1"> First Gen Child </h1>
       {children}
     </div>
