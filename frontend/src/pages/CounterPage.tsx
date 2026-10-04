@@ -1,9 +1,10 @@
+
 import { useEffect, useRef, useState } from "react";
 import {
   CounterProvider,
   useComplexObj,
   useCounterDispatch,
-} from "./contexts/CounterContext";
+} from "@/contexts/CounterContext";
 import { Button } from "../components/ui/button";
 import {
   AlertDialog,
@@ -27,41 +28,43 @@ import {
 import { Switch } from "@/components/ui/switch";
 import type { RefObject } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "./components/ui/spinner";
+import { Spinner } from "@/components/ui/spinner";
 import { createContext, useContext } from "react";
 import { toast, Toaster } from "@/components/ui/toast";
-import { Input } from "./components/ui/input";
+import { Input } from "@/components/ui/input";
 import { useForm, type SubmitHandler } from "react-hook-form";
+import { Card, CardContent } from "@/components/ui/card";
 
 const ResettingContext = createContext<boolean | null>(null);
 
-export default function App() {
-  const [isResetting, setIsResetting] = useState(false);
+interface CounterButtonProps {
+  isResetting: boolean;
+  setIsResetting: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-5">
+export default function CounterPage() {
+    
+    const [isResetting, setIsResetting] = useState(false);
+
+    return (
+    <div className="flex mt-10 flex-col items-center justify-center gap-5">
       <CounterProvider>
-        <ResettingContext.Provider value={isResetting}>
+      <ResettingContext value={isResetting}>
           <CounterButton
-            isResetting={isResetting}
-            setIsResetting={setIsResetting}
+          isResetting={isResetting}
+          setIsResetting={setIsResetting}
           />
           <FirstGenChild>
-            <SecondGenChild />
+          <SecondGenChild />
           </FirstGenChild>
-        </ResettingContext.Provider>
+      </ResettingContext>
       </CounterProvider>
       <Toaster
         viewportClassName="fixed top-0 right-0 bottom-auto left-auto z-[100] flex max-h-screen w-full flex-col p-4 sm:max-w-[420px]"
         swipeDirection={"right"}
       />
     </div>
-  );
-}
-
-interface CounterButtonProps {
-  isResetting: boolean;
-  setIsResetting: React.Dispatch<React.SetStateAction<boolean>>;
+    );
 }
 
 function CounterButton({ isResetting, setIsResetting }: CounterButtonProps) {
@@ -297,10 +300,10 @@ function CounterButton({ isResetting, setIsResetting }: CounterButtonProps) {
 
 function FirstGenChild({ children }: { children: React.ReactNode }) {
   return (
-    <div className="wrapper min-h-25 min-w-xs rounded-sm border border-gray-300 p-2">
-      <h1 className="h1"> First Gen Child </h1>
+    <Card className="wrapper sm:min-h-25 sm:min-w-xs p-2">
+      <CardContent className="h1"> First Gen Child </CardContent>
       {children}
-    </div>
+    </Card>
   );
 }
 
@@ -315,13 +318,13 @@ function SecondGenChild() {
   const isResetting = useResettingCont();
 
   return (
-    <>
+    <Card>
       {isResetting ? (
-        <Skeleton className="h-12 max-w-sm min-w-50 p-4" />
+        <Skeleton className="h-12 w-auto sm:max-w-sm sm:min-w-50 p-4" />
       ) : (
-        <h2 className="p-2 text-xl font-bold"> Second Gen Child: {val}</h2>
+        <CardContent className="p-2 text-xl font-bold"> Second Gen Child: {val}</CardContent>
       )}
-    </>
+    </Card>
   );
 }
 
