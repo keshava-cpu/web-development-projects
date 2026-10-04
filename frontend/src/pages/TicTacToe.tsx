@@ -26,13 +26,8 @@ function Board({board, WhoIsNext, onPlay, pastMove}: BoardProps) {
     if (inPastMove) {
         tempBoard = pastMove.slice();
     }
-    console.log("tempBoard: ", tempBoard);
     const gameOver = (squares: Array<string | null>) => {
         let num = 0;
-        for (const i of squares) {
-            if (i !== null) num++;
-        }
-        if (num == squares.length) return "No One";
         const lines = [
             [0, 1, 2],
             [3, 4, 5],
@@ -46,9 +41,13 @@ function Board({board, WhoIsNext, onPlay, pastMove}: BoardProps) {
         for (let i = 0; i < lines.length; i++) {
             const [a, b, c] = lines[i];
             if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-            return squares[a];
+                return squares[a];
             }
         }
+        for (const i of squares) {
+            if (i !== null) num++;
+        }
+        if (num === squares.length) return "No One";
         return null;
     }
 
@@ -104,9 +103,8 @@ export default function TicTacToe() {
     const [pastMove, setPastMove] = useState<Array<string | null> | null> (null);
 
     const onPlay = (nextState: Array<string | null>) => {
-        setHistory([...history, nextState]);
-        if (WhoIsNext == 'X') setWhoIsNext('O');
-        else setWhoIsNext('X');
+        setHistory((prevHistory) => [...prevHistory, nextState]);
+        setWhoIsNext((prevTurn) => (prevTurn === "X" ? "O" : "X"));
         setPastMove(null);
     }
     
@@ -122,7 +120,7 @@ export default function TicTacToe() {
                     </Card>
                     <ButtonGroup orientation={"vertical"} >
                         {
-                            history.map((ele, idx) => <Button className={"w-20"} key={idx} onClick={() => setPastMove(history[idx])} >{idx}</Button>)
+                            history.map((_, idx) => <Button className={"w-20"} key={idx} onClick={() => setPastMove(history[idx])} >{idx}</Button>)
                         }
                     </ButtonGroup>
                 </div>
