@@ -1,5 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
-
 import * as React from "react";
 import { Toast as ToastPrimitive } from "@base-ui/react/toast";
 import { cn } from "cn";
