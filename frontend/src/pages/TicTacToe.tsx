@@ -75,7 +75,6 @@ export default function TicTacToe() {
 
     const [debugStr, setDebugStr] = useState<Array<string | null>>(["Nothing", "YES"]);
     const [WhoIsNext, setWhoIsNext] = useState<string>("X");
-    const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
     const [history, setHistory] = useState<Array<Array<string | null>>>([Array(9).fill(null)]);
 
     const onPlay = (nextState: Array<string | null>) => {
@@ -92,8 +91,8 @@ export default function TicTacToe() {
                 
             </div>
             <div className="flex">
-                <Button  onClick={() => setDebugStr(board)} >Debug</Button>
-                <Button onClick={() => { setBoard(Array(9).fill(null)); setWhoIsNext('X')}} >Reset</Button>
+                <Button  onClick={() => setDebugStr(history[history.length - 1])} >Debug</Button>
+                <Button onClick={() => { setHistory(Array(9).fill(null)); setWhoIsNext('X')}} >Reset</Button>
             </div>
             <div>
                 <ShowDebug val={debugStr} />
