@@ -1,0 +1,33 @@
+{
+  "name": "rnd-publications-platform",
+  "private": true,
+  "workspaces": [
+    "web",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,server -c cyan,magenta \"npm run dev --workspace web\" \"npm run dev --workspace server\"",
+    "build": "npm run build --workspace web && npm run build --workspace server",
+    "start": "npm run start --workspace server",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/config-conventional": "^21.1.0",
+    "@conventional-changelog/git-client": "^3.0.1",
+    "commitlint": "^21.1.0",
+    "concurrently": "^9.2.0",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.5",
+    "vite-tsconfig-paths": "^6.1.1"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "google-auth-library": "^10.7.0",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "overrides": {
+    "shell-quote": "^1.8.4"
+  }
+}

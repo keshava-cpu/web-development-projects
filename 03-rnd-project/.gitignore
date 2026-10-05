@@ -1,0 +1,16 @@
+# Root
+node_modules/
+.env
+*.log
+.DS_Store
+
+# Backend
+backend/public/uploads/projects/*
+!backend/public/uploads/projects/.gitkeep
+backend/node_modules/
+backend/.env
+
+# Frontend
+frontend/dist/
+frontend/node_modules/
+frontend/.env

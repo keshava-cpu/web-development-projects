@@ -1,0 +1,4 @@
+username = dev10110
+email = thisthat@gmail.com
+password = 123456
+token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImRldjEwMTEwIiwidXNlcklkIjoxNiwiaWF0IjoxNzc2MzI5Mjg5LCJleHAiOjE3NzY0MTU2ODl9.8wY0OvIV6C42mwmL9wcgazWUueqWYVLNcoSlYStWRb4
